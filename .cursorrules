@@ -1,0 +1,116 @@
+# TileLoop Game - Cursor AI Rules
+
+## Project Overview
+TileLoop is a puzzle game similar to InfinityLoop where players connect tiles to close all loops. The game features:
+- Geometric tiling patterns with various polygon shapes (triangles, squares, hexagons, etc.)
+- Interactive tiles that can be rotated to connect paths
+- Dynamic level generation using mathematical tiling rules
+- Visual rendering with SVG-based tile graphics
+- Sound effects and animations for enhanced user experience
+
+## Technology Stack
+- **Framework**: SvelteKit 5 with Svelte 5 (latest)
+- **Styling**: Tailwind CSS 4.0
+- **Graphics**: SVG for tile graphics
+- **Icons**: Lucide Svelte
+- **Build Tool**: Vite
+- **Language**: JavaScript with Svelte's reactive syntax
+
+## Code Style & Architecture Guidelines
+
+### File Organization
+- Components go in `src/lib/components/`
+- Game logic classes in `src/lib/classes/` with `.svelte.js` extension
+- Utility functions in `src/lib/utils/`
+- Stores for state management in `src/lib/stores/`
+- Routes follow SvelteKit conventions in `src/routes/`
+- Static assets (SVG tiles, sounds) in `static/`
+
+### Svelte 5 Specific Rules
+- Use `$state()` for reactive variables instead of `let` with `$:`
+- Use `$derived()` for computed values instead of `$:`
+- Use `$effect()` for side effects instead of `$:`
+- Use `$props()` for component props with destructuring and defaults
+- Prefer the new event handling syntax: `onclick={handler}` instead of `on:click`
+- Use `bind:this` for element references
+
+### Component Guidelines
+- Keep components focused and single-purpose
+- Use TypeScript-style JSDoc comments for complex functions
+- Implement proper cleanup in `onMount` return functions
+- Use semantic HTML elements where appropriate
+- Follow the existing naming convention: PascalCase for components
+
+### Game Logic Patterns
+- Mathematical operations should use the Vector class for 2D calculations
+- Geometry utilities should be in `src/lib/utils/geometry.svelte.js`
+- Use tolerance-based comparisons for floating-point math (see `tolerance` constant)
+- Tiling generation follows the rule-string pattern format
+- Level generation should maintain the connection/loop logic structure
+
+### State Management
+- Use Svelte stores for global state (configuration, selected tiling, etc.)
+- Keep component-local state minimal and focused
+- Use derived stores for computed global state
+- Follow the existing store naming conventions
+
+### Styling Guidelines
+- Use Tailwind CSS classes exclusively for styling
+- Follow the existing color scheme: zinc-900 backgrounds, slate gradients
+- Maintain responsive design principles
+- Use CSS custom properties sparingly, prefer Tailwind utilities
+- Animations should use Tailwind's transition classes
+
+### Performance Considerations
+- Implement proper key-based rendering for dynamic tile lists
+- Use `{#key}` blocks when forcing re-renders of complex components
+- Optimize tile rendering by checking viewport bounds
+- Implement proper cleanup for p5.js instances
+- Use `setTimeout` for DOM cleanup when needed
+
+### Error Handling
+- Always wrap tiling generation in try-catch blocks
+- Provide fallback UI states for failed operations
+- Log errors with context information
+- Gracefully handle missing SVG assets
+
+### Code Quality Rules
+- Write self-documenting code with clear variable names
+- Use consistent indentation (tabs, as per existing code)
+- Keep functions focused and under 50 lines when possible
+- Use early returns to reduce nesting
+- Implement proper TypeScript-style parameter validation
+
+### Game-Specific Logic
+- Tile connections use binary values (0 or 1)
+- Rotation angles are in radians, use `Math.PI` constants
+- Screen coordinates require Y-axis flipping for proper display
+- Tile types follow the pattern: `{sides}_{maxConnections+1}_{connectionId}`
+- Use lexicographic ordering for tile connection patterns
+
+### Testing & Debugging
+- Include console.warn for non-critical issues
+- Use console.error for critical failures
+- Implement proper loading states for async operations
+- Provide meaningful error messages to users
+
+### Asset Management
+- SVG tiles should be loaded dynamically and cached
+- Remove unnecessary SVG attributes (width, height, style)
+- Maintain consistent SVG structure across tilesets
+- Use proper aspect ratio preservation
+
+## Response Guidelines
+- Always consider the mathematical nature of the tiling system
+- Maintain consistency with existing game mechanics
+- Prioritize performance for real-time tile interactions
+- Follow Svelte 5's reactive patterns strictly
+- Consider accessibility in UI implementations
+- Maintain the existing visual design language
+
+When implementing new features:
+1. Consider how it affects the tiling generation system
+2. Ensure proper integration with existing stores
+3. Maintain the game's mathematical precision
+4. Test with various polygon types and connection patterns
+5. Implement proper error boundaries and fallbacks
