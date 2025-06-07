@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">TileLoop</string>
+    <string name="title_activity_main">TileLoop</string>
+    <string name="package_name">com.tileloop.app</string>
+    <string name="custom_url_scheme">com.tileloop.app</string>
+</resources>

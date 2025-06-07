@@ -22,4 +22,13 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Mobile/Capacitor
+android/app/src/main/assets/public
+android/app/src/main/assets/capacitor.config.json
+android/.gradle
+android/build
+android/app/build
+ios/App/public
+ios/App/capacitor.config.json
+
 package-lock.json

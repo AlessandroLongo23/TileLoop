@@ -7,10 +7,14 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''"
+		"prepare": "svelte-kit sync || echo ''",
+		"mobile:build": "npm run build && npx cap sync",
+		"mobile:dev": "npm run mobile:build && npx cap open android",
+		"mobile:run": "npm run mobile:build && npx cap run android"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^6.0.0",
+		"@sveltejs/adapter-static": "^1.0.6",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/forms": "^0.5.9",
@@ -21,6 +25,9 @@
 		"vite": "^6.2.6"
 	},
 	"dependencies": {
+		"@capacitor/android": "^6.2.0",
+		"@capacitor/cli": "^6.2.0",
+		"@capacitor/core": "^6.2.0",
 		"lucide-svelte": "^0.511.0",
 		"p5": "^2.0.2"
 	}
