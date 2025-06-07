@@ -14,7 +14,7 @@
 	let arcMode = $state('perpendicular'); // 'perpendicular' or 'free'
 	let isDrawing = $state(false);
 	let currentPath = $state('');
-	let gridSize = $state(24);
+	let gridSize = $state(12);
 	let canvasSize = $state(600);
 	let showGrid = $state(true);
 	

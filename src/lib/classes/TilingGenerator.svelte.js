@@ -50,8 +50,14 @@ Array.prototype.cyclicallyInclude = function(array) {
     return false;
 }
 
-Array.prototype.pickRandom = function() {
-    return this[Math.floor(Math.random() * this.length)];
+Array.prototype.pickRandom = function(weights) {
+    let sum = weights.reduce((a, b) => a + b, 0);
+    let random = Math.random() * sum;
+    let cumulative = 0;
+    for (let i = 0; i < this.length; i++) {
+        cumulative += weights[i];
+        if (random <= cumulative) return this[i];
+    }
 }
 
 String.prototype.count = function(char) {

@@ -9,7 +9,8 @@
     let {
         width = 600,
         height = 600,
-        showExtra = true
+        showExtra = true,
+        onTileClick = () => {}
     } = $props();
 
     let level = $state();
@@ -17,6 +18,8 @@
     let prevSelectedTiling = $state($selectedTiling);
     let containerElement = $state();
     let generationCounter = $state(0);
+    let lastClickTime = $state(0);
+    let isProcessingClick = $state(false);
 
     // Scale factor to convert from tiling coordinates to screen pixels
     const SCALE = 60;
@@ -92,7 +95,8 @@
                 tileType: tileType,
                 rotation: 0,
                 mirrored: mirrored,
-                node: node
+                node: node,
+                isRotating: false
             });
         }
         
@@ -101,7 +105,7 @@
 
     function getTileType(tiling, node) {
         const sides = node.n;
-        const maxConnections = tiling.nodes.flatMap(n => n.halfways).map(h => h.connections).reduce((a, b) => Math.max(a, b), 0);
+        const maxConnections = node.halfways.map(h => h.connections).reduce((a, b) => Math.max(a, b), 1);
         const connections = node.halfways.map(h => h.connections);
         const [lowestLexicographicCycle, mirrored] = connections.cycleToMinimumLexicographicalOrder();
         const connectionId = lowestLexicographicCycle.fromBase(maxConnections + 1)
@@ -111,7 +115,20 @@
     }
 
     function handleContainerClick(event) {
+        // Prevent double-clicking and rapid clicking
+        const currentTime = Date.now();
+        if (isProcessingClick || currentTime - lastClickTime < 10) {
+            return;
+        }
+        
         if (!containerElement || tiles.length === 0) return;
+        
+        isProcessingClick = true;
+        lastClickTime = currentTime;
+        
+        // Prevent event bubbling
+        event.preventDefault();
+        event.stopPropagation();
         
         const rect = containerElement.getBoundingClientRect();
         const clickX = event.clientX - rect.left;
@@ -134,10 +151,25 @@
         if (closestTile) {
             handleTileClick(closestTile);
         }
+        
+        // Reset processing flag after a short delay
+        setTimeout(() => {
+            isProcessingClick = false;
+        }, 5);
     }
 
     function handleTileClick(tile) {
+        // Ensure we don't process the same tile multiple times rapidly
+        if (tile.isRotating) return;
+        
+        tile.isRotating = true;
         tile.rotation += 2 * Math.PI / tile.node.n;
+        onTileClick(); // Call the callback to increment moves
+        
+        // Reset the rotation flag after animation completes
+        setTimeout(() => {
+            tile.isRotating = false;
+        }, 5); // Match the CSS transition duration
     }
 
     Array.prototype.fromBase = function(base) {
@@ -149,19 +181,22 @@
     }
 
     Array.prototype.cycleToMinimumLexicographicalOrder = function() {
-        let min = this.slice(0);
-        let mirrored = false;
+        let temp = [...this];
+        let min = [...this];
+        let mirrored = true;
         for (let j = 0; j < 2; j++) {
-            for (let i = 0; i < this.length; i++) {
-                let rotated = this.slice(i).concat(this.slice(0, i));
+            for (let i = 0; i < temp.length; i++) {
+                let rotated = temp.slice(i).concat(temp.slice(0, i));
                 if (compareArrays(rotated, min) < 0) {
                     min = rotated;
-                    mirrored = j == 1;
+                    mirrored = j == 0;
                 }
             }
 
-            this.reverse();
+            temp = [...this].reverse();
         }
+
+        console.log(this, min, mirrored);
         return [min, mirrored];
     }
 </script>

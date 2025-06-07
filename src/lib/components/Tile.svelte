@@ -63,9 +63,7 @@
         top: {position.y}px; 
         width: {scale * scalePolygon + 1}px; 
         height: {scale * scalePolygon + 1}px;
-        transform-origin: center;
-        transform: translate(-50%, -50%) rotate({(offset + rotation) * 180 / Math.PI}deg);
-        {mirrored ? 'transform: scaleX(-1);' : ''}
+        transform: translate(-50%, -50%) rotate({(offset + rotation) * 180 / Math.PI}deg) {mirrored ? 'scaleX(-1);' : ''};
         stroke-width: {32 / scalePolygon}px;
         --border-stroke-width: {4 / scalePolygon}px;
     "

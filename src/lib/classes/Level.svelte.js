@@ -28,9 +28,9 @@ export class Level {
 
         for (const h of uniqueHalfways) {
             if (h.b) {
-                let connection = Math.random() < 0.66;
-                h.a.connections = connection ? 1 : 0;
-                h.b.connections = connection ? 1 : 0;
+                let connection = [0, 1, 2].pickRandom([0.45, 0.45, 0.10]);
+                h.a.connections = connection;
+                h.b.connections = connection;
             } else {
                 h.a.connections = 0;
             }

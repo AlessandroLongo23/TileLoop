@@ -1,3 +1,32 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* Mobile-optimized global styles */
+* {
+	-webkit-tap-highlight-color: transparent;
+	-webkit-touch-callout: none;
+}
+
+html {
+	scroll-behavior: smooth;
+	overscroll-behavior: none;
+}
+
+body {
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	overscroll-behavior: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Prevent zoom on inputs on iOS */
+input, select, textarea {
+	font-size: 16px;
+}
+
+/* Ensure full height on mobile browsers */
+.min-h-screen {
+	min-height: 100vh;
+	min-height: 100dvh;
+}

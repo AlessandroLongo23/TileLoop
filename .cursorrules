@@ -1,12 +1,14 @@
 # TileLoop Game - Cursor AI Rules
 
 ## Project Overview
-TileLoop is a puzzle game similar to InfinityLoop where players connect tiles to close all loops. The game features:
+TileLoop is a mobile puzzle game similar to InfinityLoop where players connect tiles to close all loops. The game features:
 - Geometric tiling patterns with various polygon shapes (triangles, squares, hexagons, etc.)
 - Interactive tiles that can be rotated to connect paths
 - Dynamic level generation using mathematical tiling rules
 - Visual rendering with SVG-based tile graphics
 - Sound effects and animations for enhanced user experience
+
+ALWAYS KEEP IN MIND THE MOBILE SCREEN SIZE AND PORTRAIT ORIENTATION WHEN WORKING ON GRAPHICS AND UI
 
 ## Technology Stack
 - **Framework**: SvelteKit 5 with Svelte 5 (latest)
@@ -15,6 +17,8 @@ TileLoop is a puzzle game similar to InfinityLoop where players connect tiles to
 - **Icons**: Lucide Svelte
 - **Build Tool**: Vite
 - **Language**: JavaScript with Svelte's reactive syntax
+- **Capacitor**: to then make the mobile version of the game
+- **Android Studio**: to create the actual apk file (or possibly the play store version)
 
 ## Code Style & Architecture Guidelines
 
