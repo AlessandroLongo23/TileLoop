@@ -4,7 +4,6 @@ import { sortPointsByAngleAndDistance, getClockwiseAngle } from '$lib/utils/geom
 import { apothem, angleBetween } from '$lib/utils/geometry.svelte';
 import { getSpatialKey } from '$lib/utils/optimizing.svelte';
 import { isWithinTolerance } from '$lib/utils/math.svelte';
-import { compareArrays } from '$lib/utils/utils.svelte';
 import { Vector } from '$lib/classes/Vector.svelte';
 import { Tiling } from '$lib/classes/Tiling.svelte';
 import { get } from 'svelte/store';
@@ -32,57 +31,6 @@ const vertexConfigurations = [
 
 const availablePolygons = [3, 4, 6, /*8,*/ 12];
 
-Array.prototype.cyclicallyInclude = function(array) {
-    if (array.length > this.length) return false;
-    if (array.some(a => !this.includes(a))) return false;
-    
-    for (let i = 0; i < this.length; i++) {
-        let match = true;
-        for (let j = 0; j < array.length; j++) {
-            if (this[(i + j) % this.length] != array[j]) {
-                match = false;
-                break;
-            }
-        }
-        if (match) return true;
-    }
-
-    return false;
-}
-
-Array.prototype.pickRandom = function(weights) {
-    let sum = weights.reduce((a, b) => a + b, 0);
-    let random = Math.random() * sum;
-    let cumulative = 0;
-    for (let i = 0; i < this.length; i++) {
-        cumulative += weights[i];
-        if (random <= cumulative) return this[i];
-    }
-}
-
-String.prototype.count = function(char) {
-    return this.split(char).length - 1;
-}
-
-Array.prototype.findSubsequenceStartingIndex = function(subsequence) {
-    if (subsequence.length > this.length) return [];
-
-    let startingIndexes = [];
-    for (let i = 0; i < this.length; i++) {
-        let match = true;
-        for (let j = 0; j < subsequence.length; j++) {
-            if (this[(i + j) % this.length] != subsequence[j]) {
-                match = false;
-                break;
-            }
-        }
-
-        if (match) startingIndexes.push(i);
-    }
-
-    return startingIndexes;
-}
-
 export class TilingGenerator {
     constructor() {
         this.tiling = new Tiling();
@@ -104,10 +52,6 @@ export class TilingGenerator {
 
             this.collapseVertex(lowestEntropyVertex);
             this.propagateConstraints(lowestEntropyVertex);
-
-            console.log(this.tiling.nodes)
-
-            console.log('--------------------------------')
 
             if (this.tiling.nodes.length > 250 || iterations > 100) break;
             iterations++;
@@ -207,27 +151,18 @@ export class TilingGenerator {
             }
         }
 
-        console.log('lowest entropy vertex: ', lowestEntropyVertex)
-        console.log('lowest entropy: ', lowestEntropy)
-
         return lowestEntropyVertex;
     }
 
     collapseVertex = (vertex) => {
         let randomConfiguration = vertex.possibleConfigurations.pickRandom();
         
-        console.log("chosen configuration: ", randomConfiguration)
-
-        console.log("already placed nodes around vertex: ", vertex.shapesAround)
-
         // sort the by the angle from the centroid to the vertex
         vertex.shapesAround.sort((a, b) => {
             let angleA = Vector.sub(a.centroid, vertex.coord).heading();
             let angleB = Vector.sub(b.centroid, vertex.coord).heading();
             return angleA - angleB;
         });
-
-        console.log("already placed nodes around vertex (sorted): ", vertex.shapesAround)
 
         if (vertex.shapesAround.length > 1) {
             for (let i = 0; i < vertex.shapesAround.length; i++) {
@@ -248,8 +183,6 @@ export class TilingGenerator {
                 }
             }
         }
-
-        console.log("already placed nodes around vertex (sorted after gap check): ", vertex.shapesAround)
 
         // find the starting index in the configuration
         // if more than one, select it at random
@@ -1225,40 +1158,4 @@ export class TilingGenerator {
             delete this.tiling.nodes[i].directNeighbors;
         }
     }
-}
-
-Array.prototype.cycleToMinimumLexicographicalOrder = function() {
-    let min = this.slice(0);
-    for (let i = 0; i < this.length; i++) {
-        let rotated = this.slice(i).concat(this.slice(0, i));
-        if (compareArrays(rotated, min) < 0) {
-            min = rotated;
-        }
-    }
-    return min;
-}
-
-
-Array.prototype.isEqual = function(array) {
-    if (this.length !== array.length) return false;
-    for (let i = 0; i < this.length; i++)
-        if (this[i] !== array[i]) return false;
-    return true;
-}
-
-Array.prototype.isEqualOrChiral = function(array) {
-    if (this.length !== array.length) return false;
-    
-    for (let i = 0; i < this.length; i++) {
-        let rotated = this.slice(i).concat(this.slice(0, i));
-        if (rotated.isEqual(array)) return true;
-    }
-
-    let reversed = this.slice().reverse();
-    for (let i = 0; i < this.length; i++) {
-        let rotated = reversed.slice(i).concat(reversed.slice(0, i));
-        if (rotated.isEqual(array)) return true;
-    }
-
-    return false;
 }

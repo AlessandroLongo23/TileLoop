@@ -2,6 +2,7 @@ import { tolerance, lineWidth, colorParams, islamicAngle } from '$lib/stores/con
 import { Vector } from '$lib/classes/Vector.svelte.js';
 import { map } from '$lib/utils/math.svelte.js';
 import { get } from 'svelte/store';
+import { TheaterIcon } from 'lucide-svelte';
 
 const PHI = (1 + Math.sqrt(5)) / 2;
 
@@ -10,6 +11,8 @@ export class Polygon {
         this.centroid = data.centroid;
         this.n = data.n;
         this.angle = data.angle;
+        this.turns = 0;
+        this.rotation = 0;
         
         this.neighbors = [];
         this.state = 0;
@@ -104,11 +107,9 @@ export class Polygon {
     calculateVertices = () => {
         this.vertices = [];
         let radius = 0.5 / Math.sin(Math.PI / this.n);
+        let alpha = 2 * Math.PI / this.n;
         for (let i = 0; i < this.n; i++) {
-            this.vertices.push(new Vector(
-                this.centroid.x + radius * Math.cos(i * 2 * Math.PI / this.n + this.angle),
-                this.centroid.y + radius * Math.sin(i * 2 * Math.PI / this.n + this.angle)
-            ));
+            this.vertices.push(Vector.fromPolar(this.centroid, radius, i * alpha + this.angle + this.rotation));
 
             if (Math.abs(this.vertices[i].x) < tolerance)
                 this.vertices[i].x = 0;
@@ -119,9 +120,11 @@ export class Polygon {
     }
 
     calculateHalfways = () => {
-        this.halfways = [];
+        if (!this.halfways) this.halfways = Array.from({ length: this.n }, () => new Vector(0, 0));
+
         for (let i = 0; i < this.n; i++) {
-            this.halfways.push(Vector.midpoint(this.vertices[i], this.vertices[(i + 1) % this.n]));
+            this.halfways[i].x = (this.vertices[i].x + this.vertices[(i + 1) % this.n].x) / 2;
+            this.halfways[i].y = (this.vertices[i].y + this.vertices[(i + 1) % this.n].y) / 2;
 
             if (Math.abs(this.halfways[i].x) < tolerance)
                 this.halfways[i].x = 0;
@@ -129,6 +132,14 @@ export class Polygon {
             if (Math.abs(this.halfways[i].y) < tolerance)
                 this.halfways[i].y = 0;
         }
+    }
+
+    rotate(turns = 1) {
+        this.turns += turns;
+        this.rotation = this.turns * 2 * Math.PI / this.n;
+
+        this.calculateVertices();
+        this.calculateHalfways();
     }
 }
 
@@ -258,15 +269,8 @@ export class StarPolygon extends Polygon {
         let intRadius = radius * Math.cos(gamma) - Math.sin(alpha);
         
         for (let i = 0; i < this.n; i++) {
-            this.vertices.push(new Vector(
-                this.centroid.x + radius * Math.cos(2 * gamma * i + this.angle),
-                this.centroid.y + radius * Math.sin(2 * gamma * i + this.angle)
-            )); 
-            
-            this.vertices.push(new Vector(
-                this.centroid.x + intRadius * Math.cos(2 * gamma * i + gamma + this.angle),
-                this.centroid.y + intRadius * Math.sin(2 * gamma * i + gamma + this.angle)
-            ));
+            this.vertices.push(Vector.fromPolar(this.centroid, radius, 2 * gamma * i + this.angle));
+            this.vertices.push(Vector.fromPolar(this.centroid, intRadius, 2 * gamma * i + gamma + this.angle));
         }
     }
 
@@ -314,15 +318,8 @@ export class IsotoxalPolygon extends Polygon {
         let radius = Math.cos(beta) / Math.cos(gamma);
         let intRadius = Math.tan(gamma) * Math.cos(beta) - Math.sin(beta);
         for (let i = 0; i < this.n; i++) {
-            this.vertices.push(new Vector(
-                this.centroid.x + radius * Math.cos(i * 2 * Math.PI / this.n + this.angle + Math.PI),
-                this.centroid.y + radius * Math.sin(i * 2 * Math.PI / this.n + this.angle + Math.PI)
-            ));
-
-            this.vertices.push(new Vector(
-                this.centroid.x + intRadius * Math.cos((i + .5) * 2 * Math.PI / this.n + this.angle + Math.PI),
-                this.centroid.y + intRadius * Math.sin((i + .5) * 2 * Math.PI / this.n + this.angle + Math.PI)
-            ));
+            this.vertices.push(Vector.fromPolar(this.centroid, radius, i * 2 * Math.PI / this.n + this.angle + Math.PI));
+            this.vertices.push(Vector.fromPolar(this.centroid, intRadius, (i + .5) * 2 * Math.PI / this.n + this.angle + Math.PI));
 
             if (Math.abs(this.vertices[i].x) < tolerance)
                 this.vertices[i].x = 0;

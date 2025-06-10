@@ -1,8 +1,27 @@
-export const compareArrays = (a, b) => {
-    if (a.length !== b.length) return a.length - b.length;
+export const toBinary = (number, digits, base) => {
+    let binary = [];
+    for (let i = 0; i < digits; i++) {
+        binary.push(number % base);
+        number = Math.floor(number / base);
+    }
+    return binary.reverse();
+}
 
-    for (let i = 0; i < a.length; i++)
-        if (a[i] !== b[i]) return a[i] - b[i];
-
-    return 0;
+export const generatePossibleConfigurations = (n, m) => {
+    const uniqueConfigurations = new Set();
+    const totalConfigurations = Math.pow(m, n);
+    
+    for (let i = 0; i < totalConfigurations; i++) {
+        const binary = toBinary(i, n, m);
+        const [minConfig, mirrored, turns] = binary.cycleToMinimumLexicographicalOrder();
+        
+        const configKey = minConfig.join(',');
+        uniqueConfigurations.add(configKey);
+    }
+    
+    const uniqueBinaries = Array.from(uniqueConfigurations).map(key => 
+        key.split(',').map(Number)
+    );
+    
+    return uniqueBinaries;
 }

@@ -1,15 +1,16 @@
 <script>
-    import { onMount } from 'svelte';
+    import { selectedTiling, transformSteps } from '$lib/stores/configuration.js';
+    import { Level } from '$lib/classes/Level.svelte.js';
     import { browser } from '$app/environment';
+    import { onMount } from 'svelte';
 
-    import TilingRenderer from '$lib/components/TilingRenderer.svelte';
+    import LevelRenderer from '$lib/components/LevelRenderer.svelte';
     import GameHeader from '$lib/components/GameHeader.svelte';
     import Sidebar from '$lib/components/Sidebar.svelte';
-    
+
     let width = $state(browser ? window.innerWidth : 600);
     let height = $state(browser ? window.innerHeight : 600);
     let isResizing = $state(false);
-    let soundEnabled = $state(true);
     let darkTheme = $state(true);
 
     let sidebarElement = $state('');
@@ -17,12 +18,22 @@
     let isSidebarOpen = $state(true);
     let prevSidebarState = $state(true);
 
-    // Calculate the actual rendering area dimensions
     let renderWidth = $derived(width - (isSidebarOpen ? sidebarWidth : 0));
     let renderHeight = $derived(height);
 
+    let level = $state(new Level($selectedTiling.rulestring));
+    let prevTransformSteps = $state($transformSteps);
+    let prevSelectedTiling = $state($selectedTiling);
+
+    $effect(() => {
+        if ($transformSteps !== prevTransformSteps || $selectedTiling.rulestring !== prevSelectedTiling.rulestring) {
+            level = new Level($selectedTiling.rulestring);
+            prevTransformSteps = $transformSteps;
+            prevSelectedTiling = $selectedTiling;
+        }
+    });
+
     onMount(() => {
-        // Update initial dimensions
         if (browser) {
             width = window.innerWidth;
             height = window.innerHeight;
@@ -50,27 +61,28 @@
 </script>
 
 <div class="flex h-screen w-full bg-zinc-900 overflow-hidden relative">
-    <!-- Game Header -->
     <GameHeader 
         showLevelInfo={false}
-        bind:soundEnabled
         bind:darkTheme
     />
     
-    <!-- Sidebar -->
     <Sidebar 
         bind:sidebarElement={sidebarElement} 
         bind:isSidebarOpen={isSidebarOpen}
     />
         
-    <!-- Game Renderer -->
     <div
         class="absolute top-0 right-0 bottom-0 transition-all duration-300 z-0 bg-zinc-900 overflow-hidden"
         style="left: {isSidebarOpen ? sidebarWidth : 0}px;"
     >
-        <TilingRenderer 
+        <LevelRenderer 
             width={renderWidth}
-            height={renderHeight} 
+            height={renderHeight}
+            level={level}
+            onNextLevel={() => {
+                level = new Level($selectedTiling.rulestring);
+                level.generateLevel();
+            }}
         />
     </div>
 </div>

@@ -1,7 +1,7 @@
 import { TilingGenerator } from '$lib/classes/TilingGenerator.svelte';
+import { computeIntersection } from '$lib/utils/geometry.svelte';
 import { isWithinTolerance } from '$lib/utils/math.svelte';
 import { Vector } from '$lib/classes/Vector.svelte';
-import { computeIntersection } from '$lib/utils/geometry.svelte';
 
 export class Level {
     constructor(rule) {
@@ -35,6 +35,81 @@ export class Level {
                 h.a.connections = 0;
             }
         }
+
+        this.convertTilingToTiles();
+        this.checkIfSolved();
+    }
+
+    convertTilingToTiles = () => {
+        if (!this.tiling || !this.tiling.nodes) {
+            console.warn('No this.tiling nodes available');
+            return [];
+        }
+
+        this.minMovesToSolve = 0;
+        for (const node of this.tiling.nodes) {
+            let turns = Array.from({ length: node.n - 1 }, (_, i) => i).pickRandom();
+            node.rotate(turns);
+            this.minMovesToSolve += node.n - turns; // TODO: consider tile simmetries
+        }
+
+        const generatedTiles = [];
+        for (let i = 0; i < this.tiling.nodes.length; i++) {
+            const node = this.tiling.nodes[i];
+            
+            const [tileType, mirrored, turns] = this.getTileType(node);
+            
+            node.id = `tile-${i}-${node.centroid.x.toFixed(3)}-${node.centroid.y.toFixed(3)}`;
+            node.tileType = tileType;
+            node.mirrored = mirrored;
+            node.isRotating = false;
+            node.svgTurns = turns;
+        }
+    }
+
+    getTileType = (node) => {
+        const sides = node.n;
+        const maxConnections = node.halfways.map(h => h.connections).reduce((a, b) => Math.max(a, b), 1);
+        const connections = node.halfways.map(h => h.connections);
+        const [lowestLexicographicCycle, mirrored, turns] = connections.cycleToMinimumLexicographicalOrder();
+        const tileType = `${sides}/${lowestLexicographicCycle.join("")}`;
+
+        return [tileType, mirrored, turns];
+    }
+
+    checkIfSolved = () => {
+        let uniqueHalfways = [];
+        for (const node of this.tiling.nodes) {
+            for (const halfway of node.halfways) {
+                halfway.matched = false;
+                if (!uniqueHalfways.some(h => isWithinTolerance(h.a, halfway))) {
+                    uniqueHalfways.push({
+                        a: halfway,
+                        b: null
+                    });
+                } else {
+                    uniqueHalfways.find(h => isWithinTolerance(h.a, halfway)).b = halfway;
+                }
+            }
+        }
+
+        let solved = true;
+        for (const h of uniqueHalfways) {
+            if (h.b == null) {
+                h.a.matched = h.a.connections == 0;
+                if (!h.a.matched) {
+                    solved = false;
+                }
+                continue;
+            } else if (h.a.connections != h.b.connections) {
+                solved = false;
+            } else {
+                h.a.matched = true;
+                h.b.matched = true;
+            }
+        }
+        
+        return solved;
     }
 
     draw(p5) {
@@ -140,12 +215,4 @@ export class Level {
             }
         }
     }
-}
-
-Array.prototype.next = function(i) {
-    return this[(i + 1) % this.length];
-}
-
-Array.prototype.prev = function(i) {
-    return this[(i - 1 + this.length) % this.length];
 }

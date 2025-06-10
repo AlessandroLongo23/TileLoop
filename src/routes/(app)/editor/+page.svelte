@@ -14,7 +14,7 @@
 	let arcMode = $state('perpendicular'); // 'perpendicular' or 'free'
 	let isDrawing = $state(false);
 	let currentPath = $state('');
-	let gridSize = $state(12);
+	let gridSize = $state(6);
 	let canvasSize = $state(600);
 	let showGrid = $state(true);
 	
@@ -37,7 +37,7 @@
 	let gridConfig = $derived({
 		3: { type: 'triangle', cellSize: canvasSize / gridSize / 2 },
 		4: { type: 'square', cellSize: canvasSize / gridSize },
-		6: { type: 'triangle', cellSize: canvasSize / gridSize / 2 },
+		6: { type: 'hexagon', cellSize: canvasSize / gridSize / 2 },
 		8: { type: 'square', cellSize: canvasSize / gridSize },
 		12: { type: 'square', cellSize: canvasSize / gridSize }
 	}[selectedShape]);
@@ -169,7 +169,39 @@
 				origin.y + Math.round((point.y - origin.y) / gridSpacing) * gridSpacing
 			);
 		} else if (gridConfig.type === 'triangle') {
-			const cellSize = gridConfig.cellSize * Math.sqrt(3) / 3 * 2;
+			const cellSize = gridConfig.cellSize;
+			const hexHeight = cellSize * Math.sqrt(3) / 2;
+			
+			const rel = Vector.sub(point, center);
+			
+			const q = (Math.sqrt(3) / 3 * rel.x - 1 / 3 * rel.y) / cellSize;
+			const r = (2 / 3 * rel.y) / cellSize;
+			const s = -q - r;
+			
+			let rq = Math.round(q);
+			let rr = Math.round(r);
+			let rs = Math.round(s);
+			
+			const qDiff = Math.abs(rq - q);
+			const rDiff = Math.abs(rr - r);
+			const sDiff = Math.abs(rs - s);
+			
+			if (qDiff > rDiff && qDiff > sDiff) {
+				rq = -rr - rs;
+			} else if (rDiff > sDiff) {
+				rr = -rq - rs;
+			} else {
+				rs = -rq - rr;
+			}
+			
+			const snap = new Vector(
+				center.x + cellSize * (Math.sqrt(3) * rq + Math.sqrt(3) / 2 * rr),
+				center.y + cellSize * (3 / 2 * rr)
+			);
+			
+			return snap;
+		} else if (gridConfig.type === 'hexagon') {
+			const cellSize = gridConfig.cellSize * Math.sqrt(3) / 3;
 			const hexHeight = cellSize * Math.sqrt(3) / 2;
 			
 			const rel = Vector.sub(point, center);
@@ -232,7 +264,46 @@
 				});
 			}
 		} else if (gridConfig.type === 'triangle') {
-			const cellSize = Vector.distance(polygonPoints[0], polygonPoints[1]) * canvasSize / 24
+			const cellSize = Vector.distance(polygonPoints[0], polygonPoints[1]) * canvasSize / 2 / gridSize
+			const hexHeight = cellSize * Math.sqrt(3) / 2;
+			const extent = hexHeight * 24
+			const radius = extent
+				
+			for (let row = -Math.ceil(extent / hexHeight); row <= Math.ceil(extent / hexHeight); row++) {
+				const y = center.y + row * hexHeight;
+				lines.push({
+					x1: center.x - extent,
+					y1: y,
+					x2: center.x + extent,
+					y2: y
+				});
+			}
+			
+			const cols = Math.ceil(extent / cellSize);
+			for (let col = -cols; col <= cols; col++) {
+				const startX = center.x + col * cellSize;
+				const slope = -Math.tan(Math.PI / 3);
+				
+				const x1 = startX - extent;
+				const y1 = center.y + slope * (-extent);
+				const x2 = startX + extent;
+				const y2 = center.y + slope * extent;
+				
+				lines.push({ x1, y1, x2, y2 });
+			}
+			
+			for (let col = -cols; col <= cols; col++) {
+				const startX = center.x + col * cellSize;
+				const slope = Math.tan(Math.PI / 3);
+				
+				const x1 = startX - extent;
+				const y1 = center.y + slope * (-extent);
+				const x2 = startX + extent;
+				const y2 = center.y + slope * extent;
+				
+				lines.push({ x1, y1, x2, y2 });
+			}
+		} else if (gridConfig.type === 'hexagon') {
 			const hexHeight = cellSize * Math.sqrt(3) / 2;
 			const extent = hexHeight * 24
 			const radius = extent
@@ -390,32 +461,107 @@
 		};
 	}
 
+	function createHermiteArc(point1, tangent1, point2, tangent2) {
+		// Normalize direction vectors
+		const d1Length = Math.sqrt(tangent1.x * tangent1.x + tangent1.y * tangent1.y);
+		const d2Length = Math.sqrt(tangent2.x * tangent2.x + tangent2.y * tangent2.y);
+		
+		const d1 = { x: tangent1.x / d1Length, y: tangent1.y / d1Length };
+		const d2 = { x: tangent2.x / d2Length, y: tangent2.y / d2Length };
+		
+		// Compute normals (perpendicular to directions)
+		const n1Base = { x: -d1.y, y: d1.x };
+		const n2Base = { x: -d2.y, y: d2.x };
+		
+		// Determine sign of normal so that it points toward the other point
+		const p1ToP2 = { x: point2.x - point1.x, y: point2.y - point1.y };
+		const p2ToP1 = { x: point1.x - point2.x, y: point1.y - point2.y };
+		
+		const sign1 = Math.sign(p1ToP2.x * n1Base.x + p1ToP2.y * n1Base.y);
+		const sign2 = Math.sign(p2ToP1.x * n2Base.x + p2ToP1.y * n2Base.y);
+		
+		const n1 = { x: sign1 * n1Base.x, y: sign1 * n1Base.y };
+		const n2 = { x: -sign2 * n2Base.x, y: -sign2 * n2Base.y };
+		
+		// Magnitude for Hermite tangents (controls arc curvature)
+		const dist = Math.sqrt(p1ToP2.x * p1ToP2.x + p1ToP2.y * p1ToP2.y);
+		const L = dist * 1.41;
+		const m1 = { x: n1.x * L, y: n1.y * L };
+		const m2 = { x: n2.x * L, y: n2.y * L };
+		
+		// Hermite basis functions
+		function hermiteCurve(p0, p1, r0, r1, t) {
+			const h00 = 2 * t * t * t - 3 * t * t + 1;
+			const h10 = t * t * t - 2 * t * t + t;
+			const h01 = -2 * t * t * t + 3 * t * t;
+			const h11 = t * t * t - t * t;
+			
+			return {
+				x: h00 * p0.x + h10 * r0.x + h01 * p1.x + h11 * r1.x,
+				y: h00 * p0.y + h10 * r0.y + h01 * p1.y + h11 * r1.y
+			};
+		}
+		
+		// Generate curve points and convert to SVG path
+		const numPoints = 20;
+		let path = `M ${point1.x} ${point1.y}`;
+		
+		for (let i = 1; i <= numPoints; i++) {
+			const t = i / numPoints;
+			const point = hermiteCurve(point1, point2, m1, m2, t);
+			if (i === 1) {
+				path += ` L ${point.x} ${point.y}`;
+			} else {
+				path += ` L ${point.x} ${point.y}`;
+			}
+		}
+		
+		return path;
+	}
+
+	function arePointsOnSameEdge(point1, edge1, point2, edge2) {
+		// Check if both edges are the same by comparing their endpoints
+		const tolerance = 1e-6;
+		
+		// Check if edge1 and edge2 have the same endpoints (in either order)
+		const sameEdge = (
+			(Math.abs(edge1.p1.x - edge2.p1.x) < tolerance && 
+			 Math.abs(edge1.p1.y - edge2.p1.y) < tolerance &&
+			 Math.abs(edge1.p2.x - edge2.p2.x) < tolerance && 
+			 Math.abs(edge1.p2.y - edge2.p2.y) < tolerance) ||
+			(Math.abs(edge1.p1.x - edge2.p2.x) < tolerance && 
+			 Math.abs(edge1.p1.y - edge2.p2.y) < tolerance &&
+			 Math.abs(edge1.p2.x - edge2.p1.x) < tolerance && 
+			 Math.abs(edge1.p2.y - edge2.p1.y) < tolerance)
+		);
+		
+		return sameEdge;
+	}
+
 	function createPerpendicularArc(point1, edge1, point2, edge2) {
 		// Get tangent directions from each edge (parallel to the edges)
-		// The arc should be perpendicular to the edges, so we need the tangent directions
 		const tan1 = getTangentDirection(edge1);
 		const tan2 = getTangentDirection(edge2);
 		
-		// Calculate the intersection of the two tangent lines to find the ellipse center
-		// Line 1: point1 + t1 * tan1 (tangent line from point1)
-		// Line 2: point2 + t2 * tan2 (tangent line from point2)
-		// Solve: point1 + t1 * tan1 = point2 + t2 * tan2
+		// Check if points are on the same edge - if so, use old method
+		const onSameEdge = arePointsOnSameEdge(point1, edge1, point2, edge2);
 		
+		// Calculate the intersection of the two tangent lines to find the ellipse center
 		const dx = point2.x - point1.x;
 		const dy = point2.y - point1.y;
 		
-		// Solve the system of equations:
-		// t1 * tan1.x - t2 * tan2.x = dx
-		// t1 * tan1.y - t2 * tan2.y = dy
-		
+		// Solve the system of equations for intersection
 		const det = tan1.x * (-tan2.y) - tan1.y * (-tan2.x);
 		
-		// If lines are parallel (edges are parallel), fall back to semicircle
+		// If lines are parallel, use Hermite cubic (unless on same edge)
 		if (Math.abs(det) < 1e-10) {
-			const distance = Math.sqrt(dx * dx + dy * dy);
-			const radius = distance / 2;
-			
-			return `M ${point1.x} ${point1.y} A ${radius} ${radius} 0 0 1 ${point2.x} ${point2.y}`;
+			if (onSameEdge) {
+				// For same edge with parallel lines, create a simple arc
+				const distance = Math.sqrt(dx * dx + dy * dy);
+				const radius = distance / 2;
+				return `M ${point1.x} ${point1.y} A ${radius} ${radius} 0 0 1 ${point2.x} ${point2.y}`;
+			}
+			return createHermiteArc(point1, tan1, point2, tan2);
 		}
 		
 		const t1 = (dx * (-tan2.y) - dy * (-tan2.x)) / det;
@@ -424,9 +570,29 @@
 		const centerX = point1.x + t1 * tan1.x;
 		const centerY = point1.y + t1 * tan1.y;
 		
-		// Calculate the semi-axes (distances from center to each point)
-		const semiAxis1 = Math.sqrt(Math.pow(point1.x - centerX, 2) + Math.pow(point1.y - centerY, 2));
-		const semiAxis2 = Math.sqrt(Math.pow(point2.x - centerX, 2) + Math.pow(point2.y - centerY, 2));
+		// Calculate distances from center to each point
+		const dist1 = Math.sqrt(Math.pow(point1.x - centerX, 2) + Math.pow(point1.y - centerY, 2));
+		const dist2 = Math.sqrt(Math.pow(point2.x - centerX, 2) + Math.pow(point2.y - centerY, 2));
+		
+		// Check if points are equidistant from center (within tolerance)
+		const distDiff = Math.abs(dist1 - dist2);
+		const avgDist = (dist1 + dist2) / 2;
+		const distanceTolerance = avgDist * 0.05; // 5% tolerance
+		
+		// Check if perpendiculars are at 90 degrees
+		const dotProduct = tan1.x * tan2.x + tan1.y * tan2.y;
+		const angleTolerance = 0.05; // About 3 degrees in radians
+		const isPerpendicular = Math.abs(dotProduct) < angleTolerance;
+		
+		// Use Hermite cubic if perpendiculars are not at 90 degrees AND points not equidistant
+		// BUT always use old method if points are on the same edge
+		if (!onSameEdge && !isPerpendicular && distDiff > distanceTolerance) {
+			return createHermiteArc(point1, tan1, point2, tan2);
+		}
+		
+		// Otherwise, use the original elliptical arc method
+		const semiAxis1 = dist1;
+		const semiAxis2 = dist2;
 		
 		// Calculate angles to determine arc direction
 		const angle1 = Math.atan2(point1.y - centerY, point1.x - centerX);
@@ -436,22 +602,20 @@
 		if (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
 		if (angleDiff < -Math.PI) angleDiff += 2 * Math.PI;
 		
-		// Determine arc flags - we want the arc that stays inside the polygon
+		// Determine arc flags
 		const largeArcFlag = Math.abs(angleDiff) > Math.PI ? 1 : 0;
 		const sweepFlag = angleDiff > 0 ? 1 : 0;
 		
 		// Check if we need an ellipse or can use a circle
 		const radiusDiff = Math.abs(semiAxis1 - semiAxis2);
 		const avgRadius = (semiAxis1 + semiAxis2) / 2;
-		const tolerance = avgRadius * 0.05; // 5% tolerance
+		const radiusTolerance = avgRadius * 0.05;
 		
-		if (radiusDiff > tolerance) {
+		if (radiusDiff > radiusTolerance) {
 			// Create elliptical arc
 			const majorAxis = Math.max(semiAxis1, semiAxis2);
 			const minorAxis = Math.min(semiAxis1, semiAxis2);
 			
-			// Calculate the rotation angle of the ellipse
-			// The major axis should align with the line from center to the point with larger radius
 			let rotationAngle = 0;
 			if (semiAxis1 > semiAxis2) {
 				rotationAngle = Math.atan2(point1.y - centerY, point1.x - centerX) * 180 / Math.PI;
@@ -627,8 +791,7 @@
 			const currentAngle = Math.atan2(currentPoint.y - freeArcCenter.y, currentPoint.x - freeArcCenter.x);
 			
 			// Project current point onto the circle with the average radius
-			const endX = freeArcCenter.x + radius * Math.cos(currentAngle);
-			const endY = freeArcCenter.y + radius * Math.sin(currentAngle);
+			const end = Vector.fromPolar(freeArcCenter, radius, currentAngle);
 			
 			// Calculate angle difference for arc direction
 			let angleDiff = currentAngle - startAngle;
@@ -638,7 +801,7 @@
 			const largeArcFlag = Math.abs(angleDiff) > Math.PI ? 1 : 0;
 			const sweepFlag = angleDiff > 0 ? 1 : 0;
 			
-			tempElement.d = `M ${startPoint.x} ${startPoint.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
+			tempElement.d = `M ${startPoint.x} ${startPoint.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`;
 		} else if (selectedTool === 'arc' && arcMode === 'perpendicular') {
 			// Get the edge information for the current point
 			const currentEdgeSnap = findClosestGridPointOnPolygonEdge(currentPoint);
@@ -843,6 +1006,10 @@
 			
 			<!-- Action Buttons -->
 			<div class="flex items-center gap-2">
+				<input type="number" 
+					bind:value={gridSize} 
+					class="w-16"
+				/>
 				<button
 					class="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200"
 					onclick={() => showGrid = !showGrid}
@@ -931,7 +1098,7 @@
 								y2={line.y2}
 								stroke="#e2e8f0"
 								stroke-width="0.75"
-								clip-path="url(#polygon-clip)"
+								clip-path="url(#polygon-clip-{selectedShape})"
 							/>
 						{/each}
 					</g>
@@ -939,7 +1106,7 @@
 
 				<!-- Define clipping path for grid lines -->
 				<defs>
-					<clipPath id="polygon-clip">
+					<clipPath id="polygon-clip-{selectedShape}">
 						<polygon
 							points={canvasPolygonPoints.map(p => `${p.x},${p.y}`).join(' ')}
 						/>
@@ -947,7 +1114,7 @@
 				</defs>
 
 				<!-- Drawn elements -->
-				<g clip-path="url(#polygon-clip)">
+				<g clip-path="url(#polygon-clip-{selectedShape})">
 					{#each elements as element}
 						{#if element.type === 'line'}
 							<line

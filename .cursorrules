@@ -118,3 +118,4 @@ When implementing new features:
 3. Maintain the game's mathematical precision
 4. Test with various polygon types and connection patterns
 5. Implement proper error boundaries and fallbacks
+6. Don't try to run the "npm run dev" command, I already have the page open to check the current state of the project

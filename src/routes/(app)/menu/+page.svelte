@@ -2,13 +2,9 @@
 	import { Volume2, VolumeX, Sun, Moon, Settings, BookOpen } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 
-	let soundEnabled = $state(true);
-	let darkTheme = $state(true);
+	import GameHeader from '$lib/components/GameHeader.svelte';
 
-	function toggleSound() {
-		soundEnabled = !soundEnabled;
-		// TODO: Implement actual sound toggle logic
-	}
+	let darkTheme = $state(true);
 
 	function toggleTheme() {
 		darkTheme = !darkTheme;
@@ -26,7 +22,7 @@
 	}
 
 	function startStory() {
-		goto('/play?mode=story');
+		goto('/campaign');
 	}
 
 	function startTimeAttack() {
@@ -59,54 +55,12 @@
 		<div class="w-full h-full" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
 	</div>
 
-	<!-- Header with icons -->
-	<header class="relative z-10 flex justify-between items-center p-6 pt-12">
-		<!-- Left side icons -->
-		<div class="flex gap-4">
-			<!-- Sound toggle -->
-			<button
-				onclick={toggleSound}
-				class="w-12 h-12 rounded-full bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 flex items-center justify-center text-slate-300 hover:text-white hover:bg-zinc-700/50 transition-all duration-200 ui-button"
-			>
-				{#if soundEnabled}
-					<Volume2 size={20} />
-				{:else}
-					<VolumeX size={20} />
-				{/if}
-			</button>
-
-			<!-- Theme toggle -->
-			<button
-				onclick={toggleTheme}
-				class="w-12 h-12 rounded-full bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 flex items-center justify-center text-slate-300 hover:text-white hover:bg-zinc-700/50 transition-all duration-200 ui-button"
-			>
-				{#if darkTheme}
-					<Moon size={20} />
-				{:else}
-					<Sun size={20} />
-				{/if}
-			</button>
-		</div>
-
-		<!-- Right side icons -->
-		<div class="flex gap-4">
-			<!-- Settings -->
-			<button
-				onclick={openSettings}
-				class="w-12 h-12 rounded-full bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 flex items-center justify-center text-slate-300 hover:text-white hover:bg-zinc-700/50 transition-all duration-200 ui-button"
-			>
-				<Settings size={20} />
-			</button>
-
-			<!-- Catalogue -->
-			<button
-				onclick={openCatalogue}
-				class="w-12 h-12 rounded-full bg-zinc-800/50 backdrop-blur-sm border border-zinc-700/50 flex items-center justify-center text-slate-300 hover:text-white hover:bg-zinc-700/50 transition-all duration-200 ui-button"
-			>
-				<BookOpen size={20} />
-			</button>
-		</div>
-	</header>
+	<GameHeader 
+		showLevelInfo={false}
+		showBackButton={false}
+		showStats={false}
+		bind:darkTheme
+	/>
 
 	<!-- Main content -->
 	<main class="relative z-10 flex-1 flex flex-col items-center justify-center px-8 pb-16">
@@ -120,12 +74,12 @@
 
 		<!-- Menu buttons -->
 		<div class="w-full max-w-sm space-y-4">
-			<!-- Story Mode -->
+			<!-- Campaign Mode -->
 			<button
 				onclick={startStory}
 				class="w-full py-4 px-8 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white font-semibold text-xl tracking-wide rounded-2xl border border-slate-600/50 shadow-lg hover:shadow-xl transition-all duration-300 ui-button-large backdrop-blur-sm"
 			>
-				Story
+				Campaign
 			</button>
 
 			<!-- Time Attack Mode -->

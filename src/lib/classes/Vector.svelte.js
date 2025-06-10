@@ -8,8 +8,8 @@ export class Vector {
         return new Vector(Math.cos(angle), Math.sin(angle));
     }
 
-    static fromPolar(mag, angle) {
-        return new Vector(mag * Math.cos(angle), mag * Math.sin(angle));
+    static fromPolar(center, mag, angle) {
+        return new Vector(center.x + mag * Math.cos(angle), center.y + mag * Math.sin(angle));
     }
 
     static midpoint(v1, v2) {
