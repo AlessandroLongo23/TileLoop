@@ -1,23 +1,31 @@
 <script>
 	import { Volume2, VolumeX, Sun, Moon, Settings, BookOpen } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
+	import { scale, fly, fade } from 'svelte/transition';
+	import { quintOut, backOut } from 'svelte/easing';
+	import { onMount } from 'svelte';
 
 	import GameHeader from '$lib/components/GameHeader.svelte';
 
 	let darkTheme = $state(true);
+	let showContent = $state(false);
+	let buttonsReady = $state(false);
+
+	onMount(() => {
+		// Staggered entrance animation
+		setTimeout(() => showContent = true, 100);
+		setTimeout(() => buttonsReady = true, 300);
+	});
 
 	function toggleTheme() {
 		darkTheme = !darkTheme;
-		// TODO: Implement actual theme toggle logic
 	}
 
 	function openSettings() {
-		// TODO: Navigate to settings page or open settings modal
 		console.log('Opening settings...');
 	}
 
 	function openCatalogue() {
-		// TODO: Navigate to catalogue page
 		console.log('Opening catalogue...');
 	}
 
@@ -47,13 +55,16 @@
 </svelte:head>
 
 <div class="min-h-screen bg-zinc-950 flex flex-col relative overflow-hidden">
-	<!-- Animated background -->
-	<div class="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-950 to-slate-900"></div>
+	<!-- Elegant background -->
+	<div class="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900"></div>
 	
 	<!-- Subtle pattern overlay -->
-	<div class="absolute inset-0 opacity-5">
-		<div class="w-full h-full" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+	<div class="absolute inset-0 opacity-3">
+		<div class="w-full h-full" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 60px 60px;"></div>
 	</div>
+
+	<!-- Subtle radial gradient -->
+	<div class="absolute inset-0 bg-gradient-radial from-slate-800/20 via-transparent to-transparent"></div>
 
 	<GameHeader 
 		showLevelInfo={false}
@@ -64,70 +75,96 @@
 
 	<!-- Main content -->
 	<main class="relative z-10 flex-1 flex flex-col items-center justify-center px-8 pb-16">
-		<!-- Game title -->
-		<div class="mb-16">
-			<h1 class="text-5xl md:text-6xl font-bold text-white tracking-wider mb-2">
-				LOOP
-			</h1>
-			<div class="w-full h-0.5 bg-gradient-to-r from-transparent via-slate-500 to-transparent"></div>
-		</div>
+		
+		{#if showContent}
+			<!-- Game title -->
+			<div 
+				class="mb-20"
+				transition:fly={{ y: -20, duration: 600, easing: quintOut }}
+			>
+				<h1 class="text-5xl md:text-6xl font-light text-slate-100 tracking-[0.3em] mb-4 text-center">
+					LOOP
+				</h1>
+				<div class="w-full h-px bg-gradient-to-r from-transparent via-slate-400/60 to-transparent"></div>
+			</div>
+		{/if}
 
 		<!-- Menu buttons -->
-		<div class="w-full max-w-sm space-y-4">
-			<!-- Campaign Mode -->
-			<button
-				onclick={startStory}
-				class="w-full py-4 px-8 bg-gradient-to-r from-slate-800 to-slate-700 hover:from-slate-700 hover:to-slate-600 text-white font-semibold text-xl tracking-wide rounded-2xl border border-slate-600/50 shadow-lg hover:shadow-xl transition-all duration-300 ui-button-large backdrop-blur-sm"
+		{#if buttonsReady}
+			<div 
+				class="w-full max-w-sm space-y-4"
+				transition:fly={{ y: 20, duration: 500, delay: 100, easing: quintOut }}
 			>
-				Campaign
-			</button>
+				<!-- Campaign Mode -->
+				<button
+					onclick={startStory}
+					class="w-full py-4 px-8 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/30 hover:border-slate-500/40 text-slate-100 font-light text-lg tracking-wide rounded-xl backdrop-blur-sm transition-all duration-300 group relative overflow-hidden"
+					transition:scale={{ duration: 400, delay: 0, easing: backOut }}
+				>
+					<div class="absolute inset-0 bg-gradient-to-r from-slate-700/20 to-slate-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+					<span class="relative">Campaign</span>
+				</button>
 
-			<!-- Time Attack Mode -->
-			<button
-				onclick={startTimeAttack}
-				class="w-full py-4 px-8 bg-gradient-to-r from-red-800 to-red-700 hover:from-red-700 hover:to-red-600 text-white font-semibold text-xl tracking-wide rounded-2xl border border-red-600/50 shadow-lg hover:shadow-xl transition-all duration-300 ui-button-large backdrop-blur-sm"
+				<!-- Time Attack Mode -->
+				<button
+					onclick={startTimeAttack}
+					class="w-full py-4 px-8 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/30 hover:border-slate-500/40 text-slate-100 font-light text-lg tracking-wide rounded-xl backdrop-blur-sm transition-all duration-300 group relative overflow-hidden"
+					transition:scale={{ duration: 400, delay: 100, easing: backOut }}
+				>
+					<div class="absolute inset-0 bg-gradient-to-r from-slate-700/20 to-slate-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+					<span class="relative">Time Attack</span>
+				</button>
+
+				<!-- Precision Mode -->
+				<button
+					onclick={startPrecision}
+					class="w-full py-4 px-8 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/30 hover:border-slate-500/40 text-slate-100 font-light text-lg tracking-wide rounded-xl backdrop-blur-sm transition-all duration-300 group relative overflow-hidden"
+					transition:scale={{ duration: 400, delay: 200, easing: backOut }}
+				>
+					<div class="absolute inset-0 bg-gradient-to-r from-slate-700/20 to-slate-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+					<span class="relative">Precision</span>
+				</button>
+
+				<!-- Zen Mode -->
+				<button
+					onclick={startZen}
+					class="w-full py-4 px-8 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-600/30 hover:border-slate-500/40 text-slate-100 font-light text-lg tracking-wide rounded-xl backdrop-blur-sm transition-all duration-300 group relative overflow-hidden"
+					transition:scale={{ duration: 400, delay: 300, easing: backOut }}
+				>
+					<div class="absolute inset-0 bg-gradient-to-r from-slate-700/20 to-slate-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+					<span class="relative">Zen</span>
+				</button>
+
+				<!-- Custom Mode -->
+				<button
+					onclick={startCustom}
+					class="w-full py-3 px-6 bg-slate-700/40 hover:bg-slate-600/40 border border-slate-500/20 hover:border-slate-400/30 text-slate-300 hover:text-slate-200 font-light text-base tracking-wide rounded-lg backdrop-blur-sm transition-all duration-300 group relative overflow-hidden"
+					transition:scale={{ duration: 400, delay: 400, easing: backOut }}
+				>
+					<div class="absolute inset-0 bg-gradient-to-r from-slate-600/20 to-slate-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+					<span class="relative">Custom</span>
+				</button>
+			</div>
+		{/if}
+
+		{#if showContent}
+			<!-- Elegant footer text -->
+			<div 
+				class="mt-20 text-slate-500 text-sm font-light tracking-wide"
+				transition:fade={{ duration: 800, delay: 600 }}
 			>
-				Time Attack
-			</button>
-
-			<!-- Precision Mode -->
-			<button
-				onclick={startPrecision}
-				class="w-full py-4 px-8 bg-gradient-to-r from-blue-800 to-blue-700 hover:from-blue-700 hover:to-blue-600 text-white font-semibold text-xl tracking-wide rounded-2xl border border-blue-600/50 shadow-lg hover:shadow-xl transition-all duration-300 ui-button-large backdrop-blur-sm"
-			>
-				Precision
-			</button>
-
-			<!-- Zen Mode -->
-			<button
-				onclick={startZen}
-				class="w-full py-4 px-8 bg-gradient-to-r from-green-800 to-green-700 hover:from-green-700 hover:to-green-600 text-white font-semibold text-xl tracking-wide rounded-2xl border border-green-600/50 shadow-lg hover:shadow-xl transition-all duration-300 ui-button-large backdrop-blur-sm"
-			>
-				Zen
-			</button>
-
-			<!-- Custom Mode -->
-			<button
-				onclick={startCustom}
-				class="w-full py-3 px-6 bg-gradient-to-r from-zinc-700 to-zinc-800 hover:from-zinc-600 hover:to-zinc-700 text-white font-medium text-lg tracking-wide rounded-xl border border-zinc-500/50 shadow-lg hover:shadow-xl transition-all duration-300 ui-button-large backdrop-blur-sm"
-			>
-				Custom
-			</button>
-		</div>
-
-		<!-- Subtle footer text -->
-		<div class="mt-16 text-slate-500 text-sm font-light tracking-wide">
-			Connect the loops
-		</div>
+				Connect the loops
+			</div>
+		{/if}
 	</main>
 </div>
 
 <style>
-	.ui-button:active {
-		transform: scale(0.95);
+	.bg-gradient-radial {
+		background: radial-gradient(ellipse at center, var(--tw-gradient-stops));
 	}
 	
-	.ui-button-large:active {
+	button:active {
 		transform: scale(0.98);
 	}
 </style>

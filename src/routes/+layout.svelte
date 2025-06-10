@@ -6,7 +6,7 @@
 
 	let { children } = $props();
 
-	const configs = generatePossibleConfigurations(6, 3);
+	const configs = generatePossibleConfigurations(12, 2);
 	console.log(configs);
 </script>
 

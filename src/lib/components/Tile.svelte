@@ -7,7 +7,6 @@
         position = { x: 0, y: 0 },
         scale,
         rotationTrigger = 0,
-        onClick = () => {}
     } = $props();
 
     let svgContent = $state('');
@@ -87,13 +86,14 @@
 <div 
     class="absolute transition-transform duration-200 ease-in-out tile-button pointer-events-none"
     style="
-        left: {Math.round(position.x)}px; 
-        top: {Math.round(position.y)}px; 
-        width: {Math.ceil(scale * scalePolygon) + 1}px; 
-        height: {Math.ceil(scale * scalePolygon) + 1}px;
+        left: {position.x}px; 
+        top: {position.y}px; 
+        width: {scale * scalePolygon + 1}px; 
+        height: {scale * scalePolygon + 1}px;
         transform: translate(-50%, -50%) rotate({totalRotation * 180 / Math.PI}deg) scaleX({node.mirrored ? -1 : 1});
         stroke-width: {32 / scalePolygon}px;
         --border-stroke-width: {4 / scalePolygon}px;
+        --border-stroke-color: {node.effects.length > 0 ? node.effects[0].color : '#aaa'};
     "
 >
     {#if svgContent}
@@ -135,7 +135,7 @@
 
     .tile-button :global(#border-polygon) {
         fill: none;
-        stroke: #aaa;
+        stroke: var(--border-stroke-color);
         stroke-width: var(--border-stroke-width);
     }
 

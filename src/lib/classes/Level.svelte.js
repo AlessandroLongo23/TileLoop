@@ -46,13 +46,6 @@ export class Level {
             return [];
         }
 
-        this.minMovesToSolve = 0;
-        for (const node of this.tiling.nodes) {
-            let turns = Array.from({ length: node.n - 1 }, (_, i) => i).pickRandom();
-            node.rotate(turns);
-            this.minMovesToSolve += node.n - turns; // TODO: consider tile simmetries
-        }
-
         const generatedTiles = [];
         for (let i = 0; i < this.tiling.nodes.length; i++) {
             const node = this.tiling.nodes[i];
@@ -64,7 +57,13 @@ export class Level {
             node.mirrored = mirrored;
             node.isRotating = false;
             node.svgTurns = turns;
+
+            node.effects = [];
+            if (node.halfways.some(h => h.connections) && Math.random() < 0.2) 
+                node.effects.push(new Effect('rotate', this.tiling, node));
         }
+
+        this.shuffle();
     }
 
     getTileType = (node) => {
@@ -75,6 +74,20 @@ export class Level {
         const tileType = `${sides}/${lowestLexicographicCycle.join("")}`;
 
         return [tileType, mirrored, turns];
+    }
+
+    shuffle = () => {
+        this.minMovesToSolve = 0;
+        for (const node of this.tiling.nodes) {
+            let turns = Array.from({ length: node.n - 1 }, (_, i) => i).pickRandom();
+            node.rotate(turns);
+            for (const effect of node.effects) {
+                for (let i = 0; i < turns; i++) {
+                    effect.resolve();
+                }
+            }
+            this.minMovesToSolve += node.n - turns; // TODO: consider tile simmetries
+        }
     }
 
     checkIfSolved = () => {
@@ -214,5 +227,25 @@ export class Level {
                 p5.arc(intersection.x, intersection.y, 2 * dist, 2 * dist, startAngle, endAngle);
             }
         }
+    }
+}
+
+export class Effect {
+    constructor(type, tiling, node) {
+        this.type = type;
+        this.color = '#aa0000';
+    
+        if (this.type == 'rotate') {
+            this.target = tiling.nodes.filter(n => n.id != node.id && n.halfways.some(h => h.connections)).pickRandom();
+            let choices = Array.from({ length: this.target.n }, (_, i) => (i - (node.n / 2 - 1)));
+            choices = choices.filter(c => c != 0);
+            this.turns = choices.pickRandom();
+        }
+    }
+
+    resolve() {
+        if (this.type == 'rotate') {
+            this.target.rotate(this.turns);
+        }   
     }
 }

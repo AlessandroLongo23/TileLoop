@@ -8,16 +8,13 @@
         width = 600,
         height = 600,
         level,
-        onTileClick = () => {},
-        onNextLevel = () => {}
+        renderTrigger,
+        onTileClick = () => {}
     } = $props();
 
     let containerElement = $state();
     let lastClickTime = $state(0);
     let isProcessingClick = $state(false);
-    let isSolved = $state(false);
-    
-    let renderTrigger = $state(0);
 
     const SCALE = 60;
     const center = $derived(new Vector(width / 2, height / 2));
@@ -70,8 +67,8 @@
         tile.rotate()
         renderTrigger++;
         onTileClick();
-        
-        isSolved = level.checkIfSolved()
+
+        tile.effects.forEach(effect => effect.resolve());
         
         setTimeout(() => {
             tile.isRotating = false;
@@ -92,7 +89,6 @@
             position={Vector.add(center, Vector.scale(node.centroid, SCALE))}
             scale={SCALE}
             rotationTrigger={renderTrigger}
-            onClick={() => {}} 
         />
     {/each}
     
@@ -108,19 +104,3 @@
         </div>
     {/if}
 </button>
-
-{#if isSolved}
-    <div class="absolute inset-0 flex items-center justify-center text-white bg-black/50">
-        <div class="text-center">
-            <div class="text-lg font-medium">Level solved</div>
-            <div class="text-sm">Congratulations!</div>
-
-            <button class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" onclick={() => {
-                isSolved = false;
-                onNextLevel();
-            }}>
-                Next level
-            </button>
-        </div>
-    </div>
-{/if}

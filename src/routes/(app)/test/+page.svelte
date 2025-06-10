@@ -24,7 +24,8 @@
     let level = $state(new Level($selectedTiling.rulestring));
     let prevTransformSteps = $state($transformSteps);
     let prevSelectedTiling = $state($selectedTiling);
-
+    let renderTrigger = $state(0);
+    
     $effect(() => {
         if ($transformSteps !== prevTransformSteps || $selectedTiling.rulestring !== prevSelectedTiling.rulestring) {
             level = new Level($selectedTiling.rulestring);
@@ -58,6 +59,11 @@
             }, 100);
         }
     }
+
+    function tileClick() {
+        level.shuffle();
+        renderTrigger++;
+    }
 </script>
 
 <div class="flex h-screen w-full bg-zinc-900 overflow-hidden relative">
@@ -79,10 +85,8 @@
             width={renderWidth}
             height={renderHeight}
             level={level}
-            onNextLevel={() => {
-                level = new Level($selectedTiling.rulestring);
-                level.generateLevel();
-            }}
+            onTileClick={tileClick}
+            renderTrigger={renderTrigger}
         />
     </div>
 </div>

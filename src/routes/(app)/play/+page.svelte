@@ -3,22 +3,31 @@
     import { browser } from '$app/environment';
     import { page } from '$app/stores';
 
+    import { Level } from '$lib/classes/Level.svelte';
+    import { selectedTiling } from '$lib/stores/configuration.js';
+
     import LevelRenderer from '$lib/components/LevelRenderer.svelte';
     import GameHeader from '$lib/components/GameHeader.svelte';
-    
+    import WinModal from '$lib/components/WinModal.svelte';
+
+    let renderWidth = $derived(width);
+    let renderHeight = $derived(height);
     let width = $state(browser ? window.innerWidth : 600);
     let height = $state(browser ? window.innerHeight : 600);
     let isResizing = $state(false);
     let darkTheme = $state(true);
+
+    let isSolved = $state(false);
+    let showCelebration = $state(false);
+    let celebrationStage = $state(0);
+    let renderTrigger = $state(0);
     
     let timer = $state(0);
     let moves = $state(0);
     let gameStarted = $state(false);
     let timerInterval = $state(null);
 
-    let renderWidth = $derived(width);
-    let renderHeight = $derived(height);
-
+    let level = $state(new Level($selectedTiling.rulestring));
     let gameMode = $derived($page.url.searchParams.get('mode') || 'campaign');
     let levelId = $derived($page.url.searchParams.get('level') || generateLevelId(gameMode));
 
@@ -42,9 +51,45 @@
         }
     }
 
-    function incrementMoves() {
+    function tileClick() {
         moves++;
         startTimer();
+
+        const solved = level.checkIfSolved();
+        if (solved && !isSolved) {
+            isSolved = true;
+            triggerCelebration();
+        }
+    }
+
+    const triggerCelebration = () => {
+        showCelebration = true;
+        celebrationStage = 0;
+        
+        setTimeout(() => celebrationStage = 1, 100);
+        setTimeout(() => celebrationStage = 2, 300);
+        setTimeout(() => celebrationStage = 3, 600);
+    }
+
+    const handleNextLevel = () => {
+        isSolved = false;
+        showCelebration = false;
+        celebrationStage = 0;
+
+        level = new Level($selectedTiling.rulestring);
+        timer = 0;
+        moves = 0;
+        gameStarted = false;
+        timerInterval = null;
+    }
+
+    const handlePlayAgain = () => {
+        isSolved = false;
+        showCelebration = false;
+        celebrationStage = 0;
+
+        level.shuffle();
+        renderTrigger++;
     }
 
     onMount(() => {
@@ -93,7 +138,18 @@
         <LevelRenderer 
             width={renderWidth}
             height={renderHeight}
-            onTileClick={incrementMoves}
+            level={level}
+            onTileClick={tileClick}
+            renderTrigger={renderTrigger}
         />
+
+        {#if showCelebration}
+            <WinModal
+                {showCelebration}
+                {celebrationStage}
+                handleNextLevel={handleNextLevel}
+                handlePlayAgain={handlePlayAgain}
+            />
+        {/if}
     </div>
 </div>
