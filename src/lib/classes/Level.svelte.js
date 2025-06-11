@@ -3,12 +3,19 @@ import { computeIntersection } from '$lib/utils/geometry.svelte';
 import { isWithinTolerance } from '$lib/utils/math.svelte';
 import { Vector } from '$lib/classes/Vector.svelte';
 
+import { tilingRules } from '$lib/stores/tilingRules.js';
+
 export class Level {
     constructor(rule) {
         this.tilingGenerator = new TilingGenerator();
+
+        rule = rule || tilingRules.map(group => group.rules).flat().pickRandom().rulestring;
+        console.log(rule);
         this.tiling = this.tilingGenerator.generateFromRule(rule);
 
         this.generateLevel();
+
+        this.isFrozen = false;
     }
 
     generateLevel() {

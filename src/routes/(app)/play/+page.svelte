@@ -27,7 +27,8 @@
     let gameStarted = $state(false);
     let timerInterval = $state(null);
 
-    let level = $state(new Level($selectedTiling.rulestring));
+    let level = $state(new Level());
+    
     let gameMode = $derived($page.url.searchParams.get('mode') || 'campaign');
     let levelId = $derived($page.url.searchParams.get('level') || generateLevelId(gameMode));
 
@@ -58,17 +59,21 @@
         const solved = level.checkIfSolved();
         if (solved && !isSolved) {
             isSolved = true;
-            triggerCelebration();
+            level.isFrozen = true;
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            setTimeout(() => {
+                triggerCelebration();
+            }, 1000);
         }
     }
 
     const triggerCelebration = () => {
         showCelebration = true;
         celebrationStage = 0;
-
-        if (timerInterval) {
-            clearInterval(timerInterval);
-        }
         
         setTimeout(() => celebrationStage = 1, 100);
         setTimeout(() => celebrationStage = 2, 300);
@@ -80,7 +85,7 @@
         showCelebration = false;
         celebrationStage = 0;
 
-        level = new Level($selectedTiling.rulestring);
+        level = new Level();
         timer = 0;
         moves = 0;
         gameStarted = false;
@@ -92,6 +97,7 @@
         celebrationStage = 0;
 
         level.shuffle();
+        level.isFrozen = false;
         renderTrigger++;
     }
 

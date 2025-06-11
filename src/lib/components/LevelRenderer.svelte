@@ -61,6 +61,7 @@
     }
 
     function handleTileClick(tile) {
+        if (level.isFrozen) return;
         if (tile.isRotating) return;
         
         tile.isRotating = true;

@@ -14,7 +14,7 @@ export let selectedTiling = writable({
 	}
 });
 export let isDual = writable(false);
-export let transformSteps = writable(2);
+export let transformSteps = writable(1);
 export let parameter = writable(45);
 export let lineWidth = writable(1);
 

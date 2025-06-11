@@ -6,8 +6,8 @@
 
 	let { children } = $props();
 
-	const configs = generatePossibleConfigurations(12, 2);
-	console.log(configs);
+	// const configs = generatePossibleConfigurations(12, 2);
+	// console.log(configs);
 </script>
 
 <AudioPlayer />
