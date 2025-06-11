@@ -65,6 +65,10 @@
     const triggerCelebration = () => {
         showCelebration = true;
         celebrationStage = 0;
+
+        if (timerInterval) {
+            clearInterval(timerInterval);
+        }
         
         setTimeout(() => celebrationStage = 1, 100);
         setTimeout(() => celebrationStage = 2, 300);
@@ -80,7 +84,6 @@
         timer = 0;
         moves = 0;
         gameStarted = false;
-        timerInterval = null;
     }
 
     const handlePlayAgain = () => {

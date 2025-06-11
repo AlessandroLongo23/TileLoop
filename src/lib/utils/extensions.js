@@ -41,6 +41,49 @@ Array.prototype.cycleToMinimumLexicographicalOrder = function() {
     return [min, mirrored, turns];
 }
 
+Array.prototype.getSimmetries = function() {
+    let simmetries = new Set();
+    for (let i = 0; i < this.length; i++) {
+        let rotated = this.rotate(i);
+        if (rotated.palidrome()) {
+            simmetries.add('axial');
+            break;
+        }
+    }
+
+    let divisors = getDivisors(this.length);
+    for (let divisor of divisors) {
+        let isSimmetric = true;
+        let step = this.length / divisor;
+        for (let i = 0; i < step; i++) {
+            for (let j = 0; j < this.length; j += step) {
+                if (this[i] != this[j]) {
+                    isSimmetric = false;
+                    break;
+                }
+            }
+        }
+
+        if (isSimmetric) {
+            simmetries.add(divisor);
+        }
+    }
+
+    return simmetries;
+}
+
+function getDivisors(n) {
+    let divisors = [];
+    for (let i = 1; i <= n; i++) {
+        if (n % i == 0) divisors.push(i);
+    }
+    return divisors;
+}
+
+Array.prototype.palidrome = function() {
+    return this.slice().reverse().isEqual(this);
+}
+
 Array.prototype.fromBase = function(base) {
     let result = 0;
     for (let i = 0; i < this.length; i++) {

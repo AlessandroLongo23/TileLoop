@@ -49,14 +49,16 @@ export class Level {
         const generatedTiles = [];
         for (let i = 0; i < this.tiling.nodes.length; i++) {
             const node = this.tiling.nodes[i];
-            
-            const [tileType, mirrored, turns] = this.getTileType(node);
+
+            const [tileType, mirrored, turns, simmetries] = this.getTileType(node);
             
             node.id = `tile-${i}-${node.centroid.x.toFixed(3)}-${node.centroid.y.toFixed(3)}`;
             node.tileType = tileType;
             node.mirrored = mirrored;
             node.isRotating = false;
             node.svgTurns = turns;
+            node.simmetries = simmetries;
+            console.log(simmetries);
 
             node.effects = [];
             if (node.halfways.some(h => h.connections) && Math.random() < 0.2) 
@@ -71,9 +73,10 @@ export class Level {
         const maxConnections = node.halfways.map(h => h.connections).reduce((a, b) => Math.max(a, b), 1);
         const connections = node.halfways.map(h => h.connections);
         const [lowestLexicographicCycle, mirrored, turns] = connections.cycleToMinimumLexicographicalOrder();
+        const simmetries = connections.getSimmetries();
         const tileType = `${sides}/${lowestLexicographicCycle.join("")}`;
 
-        return [tileType, mirrored, turns];
+        return [tileType, mirrored, turns, simmetries];
     }
 
     shuffle = () => {
@@ -241,11 +244,17 @@ export class Effect {
             choices = choices.filter(c => c != 0);
             this.turns = choices.pickRandom();
         }
+
+        else if (this.type == 'mirror') {
+            this.target = tiling.nodes.filter(n => n.id != node.id && n.halfways.some(h => h.connections) && n.asymmetric).pickRandom();
+        }
     }
 
     resolve() {
         if (this.type == 'rotate') {
             this.target.rotate(this.turns);
-        }   
+        } else if (this.type == 'mirror') {
+            this.target.mirror();
+        }
     }
 }
