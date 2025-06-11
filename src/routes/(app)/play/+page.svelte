@@ -65,9 +65,7 @@
                 clearInterval(timerInterval);
             }
 
-            setTimeout(() => {
-                triggerCelebration();
-            }, 1000);
+            triggerCelebration();
         }
     }
 
@@ -75,9 +73,12 @@
         showCelebration = true;
         celebrationStage = 0;
         
-        setTimeout(() => celebrationStage = 1, 100);
-        setTimeout(() => celebrationStage = 2, 300);
-        setTimeout(() => celebrationStage = 3, 600);
+        setTimeout(() => {}, 500); // first delay
+        setTimeout(() => celebrationStage = 1, 1500);  // Border animation completes
+        setTimeout(() => celebrationStage = 2, 1750);  // Modal appears  
+        setTimeout(() => celebrationStage = 3, 2000);  // Icon appears
+        setTimeout(() => celebrationStage = 4, 2250); // Message appears
+        setTimeout(() => celebrationStage = 5, 2500); // Stats/buttons appear
     }
 
     const handleNextLevel = () => {
@@ -150,6 +151,8 @@
             level={level}
             onTileClick={tileClick}
             renderTrigger={renderTrigger}
+            showCelebration={showCelebration}
+            celebrationStage={celebrationStage}
         />
 
         {#if showCelebration}

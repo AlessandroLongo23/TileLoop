@@ -9,7 +9,9 @@
         height = 600,
         level,
         renderTrigger,
-        onTileClick = () => {}
+        onTileClick = () => {},
+        showCelebration,
+        celebrationStage
     } = $props();
 
     let containerElement = $state();
@@ -90,6 +92,7 @@
             position={Vector.add(center, Vector.scale(node.centroid, SCALE))}
             scale={SCALE}
             rotationTrigger={renderTrigger}
+            celebrationStage={showCelebration ? celebrationStage : -1}
         />
     {/each}
     

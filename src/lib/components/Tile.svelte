@@ -7,6 +7,7 @@
         position = { x: 0, y: 0 },
         scale,
         rotationTrigger = 0,
+        celebrationStage = -1
     } = $props();
 
     let svgContent = $state('');
@@ -81,6 +82,15 @@
         }
         return r;
     });
+
+    // Calculate border stroke width based on celebration stage
+    let borderStrokeWidth = $derived.by(() => {
+        if (celebrationStage >= 0) {
+            // Animate to zero during stage 0
+            return 0;
+        }
+        return 4 / scalePolygon;
+    });
 </script>
 
 <div 
@@ -91,8 +101,8 @@
         width: {scale * scalePolygon + 1}px; 
         height: {scale * scalePolygon + 1}px;
         transform: translate(-50%, -50%) rotate({totalRotation * 180 / Math.PI}deg) scaleX({node.mirrored ? -1 : 1});
-        stroke-width: {32 / scalePolygon}px;
-        --border-stroke-width: {4 / scalePolygon}px;
+        stroke-width: {40 / scalePolygon}px;
+        --border-stroke-width: {borderStrokeWidth}px;
         --border-stroke-color: {node.effects.length > 0 ? node.effects[0].color : '#aaa'};
     "
 >
@@ -135,8 +145,9 @@
 
     .tile-button :global(#border-polygon) {
         fill: none;
-        stroke: var(--border-stroke-color);
+        /* stroke: var(--border-stroke-color); */
         stroke-width: var(--border-stroke-width);
+        transition: stroke-width 300ms ease-out;
     }
 
     .tile-button div {

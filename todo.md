@@ -1,12 +1,12 @@
 # Core
 
-- [ ] check for solved level
+- [x] check for solved level
 
 ## Impostazioni
 
 ### Feedback
 
-- [ ] music (on/off)
+- [x] music (on/off)
 - [ ] sound (on/off)
 - [ ] vibration (on/off)
 
@@ -23,9 +23,20 @@
 
 ## Audio
 
-- [ ] add sound and music
+- [x] add sound and music
 
 ## Tileset
 
 - [ ] add variations
 - [ ] add standard tilesets
+
+## Level generation
+
+- [ ] fix offset tiles
+- [ ] dynamic grid/tiling size
+
+## Game mechanics
+
+- [x] linked tiles
+- [ ] tile mirror action
+- [ ] dual glitch
