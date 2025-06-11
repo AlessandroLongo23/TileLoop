@@ -150,6 +150,9 @@
             <WinModal
                 {showCelebration}
                 {celebrationStage}
+                {gameMode}
+                {timer}
+                {moves}
                 handleNextLevel={handleNextLevel}
                 handlePlayAgain={handlePlayAgain}
             />
