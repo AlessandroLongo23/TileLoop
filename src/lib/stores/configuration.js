@@ -26,6 +26,8 @@ export let possibleSides = [0, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 16, 18, 20, 24, 
 export let isIslamic = writable(false);
 export let islamicAngle = writable(90);
 
+export let scale = writable(60);
+
 export const offsets = [
 	[-1, -1], [-1, 0], [-1, 1],
 	[0, -1],  [0, 0],  [0, 1],

@@ -10,8 +10,6 @@
     import GameHeader from '$lib/components/GameHeader.svelte';
     import WinModal from '$lib/components/WinModal.svelte';
 
-    let renderWidth = $derived(width);
-    let renderHeight = $derived(height);
     let width = $state(browser ? window.innerWidth : 600);
     let height = $state(browser ? window.innerHeight : 600);
     let isResizing = $state(false);
@@ -27,8 +25,8 @@
     let gameStarted = $state(false);
     let timerInterval = $state(null);
 
-    let level = $state(new Level());
-    
+    let level = $derived(new Level(null, null, width, height));
+
     let gameMode = $derived($page.url.searchParams.get('mode') || 'campaign');
     let levelId = $derived($page.url.searchParams.get('level') || generateLevelId(gameMode));
 
@@ -56,8 +54,7 @@
         moves++;
         startTimer();
 
-        const solved = level.checkIfSolved();
-        if (solved && !isSolved) {
+        if (level.checkIfSolved() && !isSolved) {
             isSolved = true;
             level.isFrozen = true;
 
@@ -73,7 +70,7 @@
         showCelebration = true;
         celebrationStage = 0;
         
-        setTimeout(() => {}, 500); // first delay
+        setTimeout(() => {}, 1000); // first delay
         setTimeout(() => celebrationStage = 1, 1500);  // Border animation completes
         setTimeout(() => celebrationStage = 2, 1750);  // Modal appears  
         setTimeout(() => celebrationStage = 3, 2000);  // Icon appears
@@ -86,7 +83,7 @@
         showCelebration = false;
         celebrationStage = 0;
 
-        level = new Level();
+        level = new Level(null, null, width, height);
         timer = 0;
         moves = 0;
         gameStarted = false;
@@ -146,8 +143,8 @@
     
     <div class="absolute top-0 right-0 bottom-0 left-0 transition-all duration-300 z-0 bg-zinc-900 overflow-hidden">
         <LevelRenderer 
-            width={renderWidth}
-            height={renderHeight}
+            width={width}
+            height={height}
             level={level}
             onTileClick={tileClick}
             renderTrigger={renderTrigger}

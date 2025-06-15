@@ -223,13 +223,13 @@ export class TilingGenerator {
         
     }
 
-    generateFromRule(rule) {
+    generateFromRule(rule, num_layers) {
         this.parseRule(rule);
 
         this.tiling.nodes = [];
         
         this.generateSeed();
-        this.generateTransformations();
+        this.generateTransformations(num_layers);
 
         if (this.tiling.dual) this.computeDual();
         
@@ -446,19 +446,14 @@ export class TilingGenerator {
         this.seedNodes = [...this.tiling.nodes];
     }
 
-    generateTransformations = () => {
-        let layers;
-        transformSteps.subscribe((v) => {
-            layers = v;
-        });
-
+    generateTransformations = (num_layers) => {
         let start = performance.now();
         let end;
         
-        for (let s = 0; s < layers; s++) {
+        for (let s = 0; s < num_layers; s++) {
             let newNodes = [];
             for (let i = 0; i < this.transforms.length; i++) {
-                if (s == layers - 1 && i == this.transforms.length - 1) break;
+                if (s == num_layers - 1 && i == this.transforms.length - 1) break;
 
                 if (s == 0) this.tiling.anchorNodes = [...this.tiling.nodes, ...newNodes];
 

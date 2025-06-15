@@ -1,24 +1,47 @@
 import { TilingGenerator } from '$lib/classes/TilingGenerator.svelte';
 import { computeIntersection } from '$lib/utils/geometry.svelte';
 import { isWithinTolerance } from '$lib/utils/math.svelte';
+import { scale } from '$lib/stores/configuration.js';
 import { Vector } from '$lib/classes/Vector.svelte';
 
 import { tilingRules } from '$lib/stores/tilingRules.js';
 
 export class Level {
-    constructor(rule) {
+    constructor(rule, transformSteps, width, height) {
         this.tilingGenerator = new TilingGenerator();
+        this.size = new Vector(width, height);
+        scale.subscribe(v => this.scale = v);
 
         rule = rule || tilingRules.map(group => group.rules).flat().pickRandom().rulestring;
-        console.log(rule);
-        this.tiling = this.tilingGenerator.generateFromRule(rule);
+        transformSteps = transformSteps || [1, 2, 3].pickRandom([0.5, 0.4, 0.1]);
+        this.tiling = this.tilingGenerator.generateFromRule(rule, transformSteps);
 
-        this.generateLevel();
+        this.removeOverflowingTiles();
+        this.generateConnections();
+        this.convertTilingToTiles();
+        this.checkIfSolved();
 
         this.isFrozen = false;
     }
 
-    generateLevel() {
+    removeOverflowingTiles() {
+        for (let i = this.tiling.nodes.length - 1; i >= 0; i--) {
+            const node = this.tiling.nodes[i];
+            node.screenPosition = Vector.add(
+                Vector.scale(this.size, 0.5), Vector.scale(node.centroid, this.scale)
+            );
+            
+            if (node.screenPosition.x > this.size.x - 50 || 
+                node.screenPosition.y > this.size.y - 50 || 
+                node.screenPosition.x < 50 || 
+                node.screenPosition.y < 50) {
+                this.tiling.nodes.splice(i, 1);
+                continue;
+            }
+        }
+    }
+
+    generateConnections() {
         let uniqueHalfways = [];
         for (const node of this.tiling.nodes) {
             for (const halfway of node.halfways) {
@@ -42,9 +65,6 @@ export class Level {
                 h.a.connections = 0;
             }
         }
-
-        this.convertTilingToTiles();
-        this.checkIfSolved();
     }
 
     convertTilingToTiles = () => {
@@ -54,18 +74,18 @@ export class Level {
         }
 
         const generatedTiles = [];
-        for (let i = 0; i < this.tiling.nodes.length; i++) {
+        for (let i = this.tiling.nodes.length - 1; i >= 0; i--) {
             const node = this.tiling.nodes[i];
 
             const [tileType, mirrored, turns, simmetries] = this.getTileType(node);
             
             node.id = `tile-${i}-${node.centroid.x.toFixed(3)}-${node.centroid.y.toFixed(3)}`;
+            
             node.tileType = tileType;
             node.mirrored = mirrored;
             node.isRotating = false;
             node.svgTurns = turns;
             node.simmetries = simmetries;
-            console.log(simmetries);
 
             node.effects = [];
             if (node.halfways.some(h => h.connections) && Math.random() < 0.2) 
@@ -247,7 +267,7 @@ export class Effect {
     
         if (this.type == 'rotate') {
             this.target = tiling.nodes.filter(n => n.id != node.id && n.halfways.some(h => h.connections)).pickRandom();
-            let choices = Array.from({ length: this.target.n }, (_, i) => (i - (node.n / 2 - 1)));
+            let choices = Array.from({ length: this.target.n }, (_, i) => (i - (Math.floor(node.n / 2) - 1)));
             choices = choices.filter(c => c != 0);
             this.turns = choices.pickRandom();
         }

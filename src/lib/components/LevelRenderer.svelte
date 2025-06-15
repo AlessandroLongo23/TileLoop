@@ -1,5 +1,5 @@
 <script>
-    import { selectedTiling } from '$lib/stores/configuration.js';
+    import { selectedTiling, scale } from '$lib/stores/configuration.js';
     import { Vector } from '$lib/classes/Vector.svelte.js';
 
     import Tile from './Tile.svelte';
@@ -17,9 +17,6 @@
     let containerElement = $state();
     let lastClickTime = $state(0);
     let isProcessingClick = $state(false);
-
-    const SCALE = 60;
-    const center = $derived(new Vector(width / 2, height / 2));
 
     function handleContainerClick(event) {
         const currentTime = Date.now();
@@ -42,9 +39,7 @@
         let minDistance = Infinity;
         
         for (const tile of level.tiling.nodes) {
-            const screenPos = Vector.add(center, Vector.scale(tile.centroid, SCALE));
-            
-            const offset = Vector.sub(clickPos, screenPos);
+            const offset = Vector.sub(clickPos, tile.screenPosition);
             const distance = offset.mag();
             
             if (distance < minDistance) {
@@ -53,7 +48,7 @@
             }
         }
         
-        if (closestTile && minDistance < SCALE) {
+        if (closestTile && minDistance < $scale) {
             handleTileClick(closestTile);
         }
         
@@ -69,9 +64,9 @@
         tile.isRotating = true;
         tile.rotate()
         renderTrigger++;
-        onTileClick();
-
         tile.effects.forEach(effect => effect.resolve());
+        
+        onTileClick();
         
         setTimeout(() => {
             tile.isRotating = false;
@@ -89,8 +84,6 @@
     {#each level.tiling.nodes as node}
         <Tile 
             node={node}
-            position={Vector.add(center, Vector.scale(node.centroid, SCALE))}
-            scale={SCALE}
             rotationTrigger={renderTrigger}
             celebrationStage={showCelebration ? celebrationStage : -1}
         />

@@ -1,11 +1,9 @@
 <script>
     import { onMount } from 'svelte';
     import { Vector } from '$lib/classes/Vector.svelte.js';
-    
+    import { scale } from '$lib/stores/configuration.js';
     let {
         node,
-        position = { x: 0, y: 0 },
-        scale,
         rotationTrigger = 0,
         celebrationStage = -1
     } = $props();
@@ -96,10 +94,10 @@
 <div 
     class="absolute transition-transform duration-200 ease-in-out tile-button pointer-events-none"
     style="
-        left: {position.x}px; 
-        top: {position.y}px; 
-        width: {scale * scalePolygon + 1}px; 
-        height: {scale * scalePolygon + 1}px;
+        left: {node.screenPosition.x}px; 
+        top: {node.screenPosition.y}px; 
+        width: {$scale * scalePolygon + 1}px; 
+        height: {$scale * scalePolygon + 1}px;
         transform: translate(-50%, -50%) rotate({totalRotation * 180 / Math.PI}deg) scaleX({node.mirrored ? -1 : 1});
         stroke-width: {40 / scalePolygon}px;
         --border-stroke-width: {borderStrokeWidth}px;
@@ -124,9 +122,9 @@
     <div
         class="absolute flex flex-row gap-1 transition-transform duration-200 ease-in-out"
         style="
-            transform: translate({temp.x * scale * 0.8}px, {temp.y * scale * 0.8}px);
-            left: {Math.round(position.x)}px;
-            top: {Math.round(position.y)}px;
+            transform: translate({temp.x * $scale * 0.8}px, {temp.y * $scale * 0.8}px);
+            left: {Math.round(node.screenPosition.x)}px;
+            top: {Math.round(node.screenPosition.y)}px;
         "
     >
         {#each { length: halfway.connections }, connection}
