@@ -7,7 +7,8 @@
 		campaignProgress, 
 		CHAPTERS_COUNT, 
 		LEVELS_PER_CHAPTER,
-		isChapterUnlocked 
+		isChapterUnlocked,
+		startGameSession
 	} from '$lib/stores/campaign.js';
 
 	let darkTheme = $state(true);
@@ -28,7 +29,8 @@
 	}
 
 	function handleLevelClick(chapter, level) {
-		goto(`/play?mode=campaign&chapter=${chapter}&level=${level}`);
+		startGameSession('campaign', chapter, level);
+		goto('/play');
 	}
 
 	function goBack() {

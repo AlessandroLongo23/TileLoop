@@ -29,6 +29,7 @@
 		"@capacitor/cli": "^6.2.0",
 		"@capacitor/core": "^6.2.0",
 		"lucide-svelte": "^0.511.0",
-		"p5": "^2.0.2"
+		"p5": "^2.0.2",
+		"svelte-capacitor-store": "^0.3.6"
 	}
 }

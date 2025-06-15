@@ -13,5 +13,25 @@
 	</head>
 	<body data-sveltekit-preload-data="hover" class="overscroll-none touch-manipulation">
 		<div style="display: contents">%sveltekit.body%</div>
+		
+		<script>
+			// Support for orientation changes and viewport handling
+			if ('screen' in window && 'orientation' in window.screen) {
+				window.addEventListener('orientationchange', () => {
+					setTimeout(() => {
+						if (window.visualViewport) {
+							const height = window.visualViewport.height;
+							document.documentElement.style.setProperty('--vh', `${height * 0.01}px`);
+						}
+					}, 100);
+				});
+			}
+			
+			// Set initial viewport height
+			if (window.visualViewport) {
+				const height = window.visualViewport.height;
+				document.documentElement.style.setProperty('--vh', `${height * 0.01}px`);
+			}
+		</script>
 	</body>
 </html>

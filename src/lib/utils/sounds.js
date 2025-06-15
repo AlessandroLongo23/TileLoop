@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import { gameSettings } from '$lib/stores/gameProgress.js';
 
 let audioContext;
 if (browser) {
@@ -48,6 +49,18 @@ async function loadSound(url) {
 export function playSound(sound, volume = 0.5, options = {}) {
 	if (!browser || !audioContext) {
 		return Promise.resolve();
+	}
+	
+	// Check if sound effects are enabled
+	let settings;
+	try {
+		settings = gameSettings.get();
+		if (!settings.soundEnabled) {
+			return Promise.resolve();
+		}
+	} catch (e) {
+		// If settings aren't loaded yet, play sound anyway
+		console.warn('Game settings not loaded, playing sound anyway');
 	}
 	
 	const soundType = sound.split('/').pop().split('.')[0].replace(/\s+/g, '').toLowerCase();

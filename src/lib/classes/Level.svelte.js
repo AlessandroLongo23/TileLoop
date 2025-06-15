@@ -34,7 +34,7 @@ export class Level {
             if (node.screenPosition.x > this.size.x - 50 || 
                 node.screenPosition.y > this.size.y - 50 || 
                 node.screenPosition.x < 50 || 
-                node.screenPosition.y < 50) {
+                node.screenPosition.y < 200) {
                 this.tiling.nodes.splice(i, 1);
                 continue;
             }

@@ -1,8 +1,18 @@
 <script>
-	import { Volume2, VolumeX, Sun, Moon, Settings, BookOpen, ArrowLeft, Clock, Target } from 'lucide-svelte';
+	import { Volume2, VolumeX, Settings, BookOpen, ArrowLeft, Clock, Target } from 'lucide-svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { isMuted } from '$lib/stores/audio';
+
+	import { 
+		gameSettings, 
+		getCurrentCampaignProgress, 
+		getCurrentModeProgress,
+		campaignProgress,
+		zenModeProgress,
+		timeAttackProgress,
+		precisionModeProgress
+	} from '$lib/stores/gameProgress.js';
+	import GameSettings from './GameSettings.svelte';
 
 	let { 
 		showLevelInfo = false,
@@ -14,17 +24,28 @@
 		moves = 0,
 		darkTheme = $bindable(true)
 	} = $props();
+	
+	let showSettingsModal = $state(false);
+
+	// Get current progress for display
+	const currentProgress = $derived(() => {
+		if (gameMode === 'campaign') {
+			return getCurrentCampaignProgress();
+		} else if (gameMode) {
+			return getCurrentModeProgress(gameMode);
+		}
+		return null;
+	});
 
 	function toggleSound() {
-		$isMuted = !$isMuted;
-	}
-
-	function toggleTheme() {
-		darkTheme = !darkTheme;
+		gameSettings.update(settings => ({
+			...settings,
+			soundEnabled: !settings.soundEnabled
+		}));
 	}
 
 	function openSettings() {
-		console.log('Opening settings...');
+		showSettingsModal = true;
 	}
 
 	function openCatalogue() {
@@ -32,12 +53,16 @@
 	}
 
 	function goBack() {
-		goto('/menu');
+		if (gameMode === 'campaign') {
+			goto('/campaign');
+		} else {
+			goto('/menu');
+		}
 	}
 
 	function formatLevelDisplay(mode, id) {
 		if (mode === 'campaign') {
-			return id;
+			return id.replaceAll('-', ' - ');
 		} else if (mode === 'zen' || mode === 'timeattack' || mode === 'precision') {
 			return `Level ${id}`;
 		}
@@ -72,53 +97,35 @@
 					<ArrowLeft size={18} />
 				</button>
 			{/if}
-
-			<button
-				onclick={toggleSound}
-				class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/40 transition-all duration-200 active:scale-95 shadow-lg ui-button"
-			>
-				{#if $isMuted}
-					<VolumeX size={18} />
-				{:else}
-					<Volume2 size={18} />
-				{/if}
-			</button>
-
-			<button
-				onclick={toggleTheme}
-				class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/40 transition-all duration-200 active:scale-95 shadow-lg ui-button"
-			>
-				{#if darkTheme}
-					<Moon size={18} />
-				{:else}
-					<Sun size={18} />
-				{/if}
-			</button>
 		</div>
 
 		{#if showLevelInfo}
-			<div class="flex flex-col items-center pointer-events-none">
-				<div class="text-white/60 text-xs font-medium uppercase tracking-wider mb-1">
-					{getModeDisplayName(gameMode)}
-				</div>
-
-				<div class="text-white text-lg font-bold tracking-wide bg-black/20 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 mb-2">
-					{formatLevelDisplay(gameMode, levelId)}
+		<!-- Modern card-style container with dark background -->
+			<div class="flex flex-col items-center gap-4 w-40 py-2 pointer-events-none bg-black/30 backdrop-blur-lg border border-white/20 rounded-2xl shadow-xl">
+				<div class="flex flex-col gap-2">
+					<div class="text-white/90 text-xs font-semibold uppercase tracking-widest text-center">
+						{getModeDisplayName(gameMode)}
+					</div>
+					
+					<div class="text-white text-xl font-bold tracking-wide text-center">
+						{formatLevelDisplay(gameMode, levelId)}
+					</div>
 				</div>
 				
-				{#if showStats}
-					<div class="flex gap-4 text-sm">
+				<!-- Stats with modern design -->
+				{#if showStats && gameMode !== 'zen'}
+					<div class="flex gap-2 justify-center">
 						{#if gameMode === 'timeattack' || gameMode === 'campaign'}
-							<div class="flex items-center gap-1 text-white/80 bg-black/20 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-								<Clock size={14} />
-								<span class="font-mono">{formatTime(timer)}</span>
+							<div class="flex items-center gap-1.5 bg-black/30 px-2.5 py-1.5 rounded-xl border border-white/20">
+								<Clock size={10} class="text-white/80" />
+								<span class="font-mono text-xs text-white font-medium">{formatTime(timer)}</span>
 							</div>
 						{/if}
 						
 						{#if gameMode === 'precision' || gameMode === 'campaign'}
-							<div class="flex items-center gap-1 text-white/80 bg-black/20 backdrop-blur-md px-2 py-1 rounded-lg border border-white/10">
-								<Target size={14} />
-								<span class="font-mono">{moves}</span>
+							<div class="flex items-center gap-1.5 bg-black/30 px-2.5 py-1.5 rounded-xl border border-white/20">
+								<Target size={10} class="text-white/80" />
+								<span class="font-mono text-xs text-white font-medium">{moves}</span>
 							</div>
 						{/if}
 					</div>
@@ -134,15 +141,21 @@
 				<Settings size={18} />
 			</button>
 
-			<button
+			<!-- <button
 				onclick={openCatalogue}
 				class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/40 transition-all duration-200 active:scale-95 shadow-lg ui-button"
 			>
 				<BookOpen size={18} />
-			</button>
+			</button> -->
 		</div>
 	</div>
 </header>
+
+<!-- Settings Modal -->
+<GameSettings 
+	isOpen={showSettingsModal}
+	onClose={() => showSettingsModal = false}
+/>
 
 <style>
 	.ui-button:active {

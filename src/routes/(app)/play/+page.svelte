@@ -1,10 +1,24 @@
 <script>
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
-    import { page } from '$app/stores';
+    import { goto } from '$app/navigation';
 
     import { Level } from '$lib/classes/Level.svelte';
     import { selectedTiling } from '$lib/stores/configuration.js';
+    import { 
+        completeLevel, 
+        updateGameModeProgress, 
+        saveCurrentGameState, 
+        clearCurrentGameState,
+        currentGameState,
+        currentGameSession,
+        gameSettings,
+        advanceToNextLevel,
+        endGameSession,
+        getCurrentSession,
+        CHAPTERS_COUNT,
+        LEVELS_PER_CHAPTER
+    } from '$lib/stores/gameProgress.js';
 
     import LevelRenderer from '$lib/components/LevelRenderer.svelte';
     import GameHeader from '$lib/components/GameHeader.svelte';
@@ -25,18 +39,21 @@
     let gameStarted = $state(false);
     let timerInterval = $state(null);
 
-    let level = $derived(new Level(null, null, width, height));
+    // Get current session data from store instead of URL
+    let session = $derived($currentGameSession);
+    let gameMode = $derived(session?.gameMode || 'campaign');
+    let chapterNum = $derived(session?.chapter || 1);
+    let levelNum = $derived(session?.level || 1);
+    let levelId = $derived(generateLevelId(gameMode, chapterNum, levelNum));
 
-    let gameMode = $derived($page.url.searchParams.get('mode') || 'campaign');
-    let levelId = $derived($page.url.searchParams.get('level') || generateLevelId(gameMode));
+    // Initialize the level - will be regenerated manually when needed
+    let level = $state(new Level(null, null, width, height));
 
-    function generateLevelId(mode) {
+    function generateLevelId(mode, chapter, level) {
         if (mode === 'campaign') {
-            const chapter = $page.url.searchParams.get('chapter') || '1';
-            const level = $page.url.searchParams.get('levelNum') || '1';
             return `${chapter}-${level}`;
         } else if (mode === 'zen' || mode === 'timeattack' || mode === 'precision') {
-            return $page.url.searchParams.get('levelNum') || '1';
+            return level.toString();
         }
         return '1';
     }
@@ -46,13 +63,42 @@
             gameStarted = true;
             timerInterval = setInterval(() => {
                 timer++;
+                // Auto-save game state every 5 seconds if enabled
+                if ($gameSettings.autoSave && timer % 5 === 0) {
+                    saveGameState();
+                }
             }, 1000);
         }
+    }
+
+    function saveGameState() {
+        const currentSession = getCurrentSession();
+        const gameData = {
+            gameMode: currentSession.gameMode,
+            levelId,
+            chapterNum: currentSession.chapter,
+            levelNum: currentSession.level,
+            timer,
+            moves,
+            startTime: new Date().toISOString(),
+            levelState: {
+                // Save level state if needed - can be expanded
+                isSolved,
+                gameStarted
+            }
+        };
+        
+        saveCurrentGameState(gameData);
     }
 
     function tileClick() {
         moves++;
         startTimer();
+
+        // Auto-save on every move if enabled
+        if ($gameSettings.autoSave) {
+            saveGameState();
+        }
 
         if (level.checkIfSolved() && !isSolved) {
             isSolved = true;
@@ -62,8 +108,48 @@
                 clearInterval(timerInterval);
             }
 
+            handleLevelComplete();
             triggerCelebration();
         }
+    }
+
+    function handleLevelComplete() {
+        const completionData = {
+            gameMode,
+            level: levelNum,
+            chapter: chapterNum,
+            time: timer,
+            moves,
+            completed: true,
+            playTime: timer,
+            stars: calculateStars(),
+            isPerfect: moves <= (level.minMovesToSolve || moves) // Check if optimal
+        };
+
+        // Save progress based on game mode
+        if (gameMode === 'campaign') {
+            completeLevel(chapterNum, levelNum, {
+                time: timer,
+                moves,
+                stars: completionData.stars
+            });
+        } else {
+            updateGameModeProgress(gameMode, completionData);
+        }
+
+        // Clear current game state since level is completed
+        clearCurrentGameState();
+    }
+
+    function calculateStars() {
+        // Simple star calculation based on moves vs optimal
+        const optimalMoves = level.minMovesToSolve || moves;
+        const efficiency = optimalMoves / moves;
+        
+        if (efficiency >= 1.0) return 3; // Perfect
+        if (efficiency >= 0.8) return 2; // Good
+        if (efficiency >= 0.6) return 1; // Okay
+        return 0; // Could be better
     }
 
     const triggerCelebration = () => {
@@ -79,14 +165,40 @@
     }
 
     const handleNextLevel = () => {
+        // Close celebration modal first
         isSolved = false;
         showCelebration = false;
         celebrationStage = 0;
 
-        level = new Level(null, null, width, height);
+        // Reset game state for new level
         timer = 0;
         moves = 0;
         gameStarted = false;
+        
+        // Clear any existing timer
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // Advance to next level using session store
+        advanceToNextLevel();
+        
+        // Check if campaign is completed
+        const currentSession = getCurrentSession();
+        if (!currentSession.isActive) {
+            // Campaign completed or session ended
+            goto('/campaign');
+            return;
+        }
+
+        // Generate a new random level
+        level = new Level(null, null, width, height);
+        
+        // Force a re-render
+        renderTrigger++;
+
+        console.log(`Generated new level for: ${gameMode} ${generateLevelId(currentSession.gameMode, currentSession.chapter, currentSession.level)}`);
     }
 
     const handlePlayAgain = () => {
@@ -103,6 +215,17 @@
         if (browser) {
             width = window.innerWidth;
             height = window.innerHeight;
+            
+            // Check if there's a valid game session
+            const currentSession = getCurrentSession();
+            if (!currentSession.isActive) {
+                // No active session, redirect to menu
+                goto('/menu');
+                return;
+            }
+            
+            // Check for saved game state and restore if exists
+            restoreGameState();
         }
         
         window.addEventListener('resize', handleResize);
@@ -112,8 +235,40 @@
             if (timerInterval) {
                 clearInterval(timerInterval);
             }
+            
+            // Save game state on unmount if game is active
+            if (gameStarted && !isSolved && $gameSettings.autoSave) {
+                saveGameState();
+            }
         };
     });
+
+    async function restoreGameState() {
+        const savedState = $currentGameState;
+        const currentSession = getCurrentSession();
+        
+        if (savedState && 
+            savedState.gameMode === currentSession.gameMode && 
+            savedState.levelId === levelId) {
+            
+            // Restore game state
+            timer = savedState.timer || 0;
+            moves = savedState.moves || 0;
+            gameStarted = savedState.levelState?.gameStarted || false;
+            
+            // Resume timer if game was active
+            if (gameStarted && !isSolved) {
+                timerInterval = setInterval(() => {
+                    timer++;
+                    if ($gameSettings.autoSave && timer % 5 === 0) {
+                        saveGameState();
+                    }
+                }, 1000);
+            }
+            
+            console.log('Game state restored:', { timer, moves, gameStarted });
+        }
+    }
 
     const handleResize = () => {
         if (!isResizing) {

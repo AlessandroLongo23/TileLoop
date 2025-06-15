@@ -32,8 +32,8 @@
 
 ## Level generation
 
-- [ ] fix offset tiles
-- [ ] dynamic grid/tiling size
+- [x] fix offset tiles
+- [x] dynamic grid/tiling size
 
 ## Game mechanics
 
