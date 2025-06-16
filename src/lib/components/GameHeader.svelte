@@ -1,5 +1,5 @@
 <script>
-	import { Volume2, VolumeX, Settings, BookOpen, ArrowLeft, Clock, Target } from 'lucide-svelte';
+	import { Volume2, VolumeX, Settings, Palette, ArrowLeft, Clock, Target } from 'lucide-svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 
@@ -12,7 +12,9 @@
 		timeAttackProgress,
 		precisionModeProgress
 	} from '$lib/stores/gameProgress.js';
-	import GameSettings from './GameSettings.svelte';
+
+	import GameSettings from '$lib/components/GameSettings.svelte';
+	import AppearanceModal from '$lib/components/AppearanceModal.svelte';
 
 	let { 
 		showLevelInfo = false,
@@ -26,6 +28,7 @@
 	} = $props();
 	
 	let showSettingsModal = $state(false);
+	let showAppearanceModal = $state(false);
 
 	// Get current progress for display
 	const currentProgress = $derived(() => {
@@ -48,8 +51,8 @@
 		showSettingsModal = true;
 	}
 
-	function openCatalogue() {
-		console.log('Opening catalogue...');
+	function openAppearance() {
+		showAppearanceModal = true;
 	}
 
 	function goBack() {
@@ -95,6 +98,15 @@
 					class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/40 transition-all duration-200 active:scale-95 shadow-lg ui-button"
 				>
 					<ArrowLeft size={18} />
+				</button>
+			{/if}
+
+			{#if gameMode != ''}
+				<button
+					onclick={openAppearance}
+					class="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/80 hover:text-white hover:bg-black/40 transition-all duration-200 active:scale-95 shadow-lg ui-button"
+				>
+					<Palette size={18} />
 				</button>
 			{/if}
 		</div>
@@ -155,6 +167,11 @@
 <GameSettings 
 	isOpen={showSettingsModal}
 	onClose={() => showSettingsModal = false}
+/>
+
+<AppearanceModal
+	isOpen={showAppearanceModal}
+	onClose={() => showAppearanceModal = false}
 />
 
 <style>

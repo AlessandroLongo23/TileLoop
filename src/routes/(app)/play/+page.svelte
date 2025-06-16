@@ -113,7 +113,7 @@
         }
     }
 
-    function handleLevelComplete() {
+    async function handleLevelComplete() {
         const completionData = {
             gameMode,
             level: levelNum,
@@ -128,7 +128,7 @@
 
         // Save progress based on game mode
         if (gameMode === 'campaign') {
-            completeLevel(chapterNum, levelNum, {
+            await completeLevel(chapterNum, levelNum, {
                 time: timer,
                 moves,
                 stars: completionData.stars

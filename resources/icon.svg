@@ -1,0 +1,88 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e293b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="tileGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    </linearGradient>
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="512" cy="512" r="500" fill="url(#bgGradient)" stroke="#374151" stroke-width="8"/>
+  
+  <!-- Main geometric pattern - hexagonal tiles forming a loop -->
+  
+  <!-- Center hexagon -->
+  <polygon points="512,300 562,325 562,375 512,400 462,375 462,325" 
+           fill="url(#tileGradient)" 
+           stroke="#e5e7eb" 
+           stroke-width="3"/>
+  
+  <!-- Surrounding hexagons -->
+  <polygon points="412,350 462,325 462,375 412,400 362,375 362,325" 
+           fill="url(#tileGradient)" 
+           stroke="#e5e7eb" 
+           stroke-width="3"/>
+  
+  <polygon points="612,350 662,325 662,375 612,400 562,375 562,325" 
+           fill="url(#tileGradient)" 
+           stroke="#e5e7eb" 
+           stroke-width="3"/>
+  
+  <polygon points="462,450 512,425 512,475 462,500 412,475 412,425" 
+           fill="url(#tileGradient)" 
+           stroke="#e5e7eb" 
+           stroke-width="3"/>
+  
+  <polygon points="562,450 612,425 612,475 562,500 512,475 512,425" 
+           fill="url(#tileGradient)" 
+           stroke="#e5e7eb" 
+           stroke-width="3"/>
+  
+  <polygon points="512,550 562,525 562,575 512,600 462,575 462,525" 
+           fill="url(#tileGradient)" 
+           stroke="#e5e7eb" 
+           stroke-width="3"/>
+  
+  <!-- Connection paths forming a loop -->
+  <path d="M 512,300 L 512,250 A 50,50 0 0,1 562,300 L 612,350 A 50,50 0 0,1 612,400 L 562,450 A 50,50 0 0,1 512,500 L 512,550 A 50,50 0 0,1 462,600 L 412,550 A 50,50 0 0,1 362,500 L 312,450 A 50,50 0 0,1 312,350 L 362,300 A 50,50 0 0,1 412,250 L 462,300 A 50,50 0 0,1 512,300 Z" 
+        fill="none" 
+        stroke="url(#pathGradient)" 
+        stroke-width="12" 
+        stroke-linecap="round" 
+        filter="url(#glow)"/>
+  
+  <!-- Inner connecting lines -->
+  <line x1="437" y1="337" x2="487" y2="337" stroke="url(#pathGradient)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="537" y1="337" x2="587" y2="337" stroke="url(#pathGradient)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="437" y1="437" x2="487" y2="437" stroke="url(#pathGradient)" stroke-width="8" stroke-linecap="round"/>
+  <line x1="537" y1="437" x2="587" y2="437" stroke="url(#pathGradient)" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Title text -->
+  <text x="512" y="720" font-family="Arial, sans-serif" font-size="72" font-weight="bold" text-anchor="middle" fill="#f1f5f9">TileLoop</text>
+  
+  <!-- Subtitle -->
+  <text x="512" y="780" font-family="Arial, sans-serif" font-size="36" text-anchor="middle" fill="#94a3b8">Puzzle Game</text>
+  
+  <!-- Small decorative elements -->
+  <circle cx="200" cy="200" r="8" fill="url(#pathGradient)" opacity="0.7"/>
+  <circle cx="824" cy="200" r="8" fill="url(#pathGradient)" opacity="0.7"/>
+  <circle cx="200" cy="824" r="8" fill="url(#pathGradient)" opacity="0.7"/>
+  <circle cx="824" cy="824" r="8" fill="url(#pathGradient)" opacity="0.7"/>
+</svg> 

@@ -62,21 +62,12 @@
 		</div>
 		
 		<!-- Tap to start prompt -->
-		<div class="pb-16 md:pb-24">
-			{#if showTapPrompt}
-				<p class="text-slate-300 text-lg md:text-xl font-light tracking-wide animate-pulse-slow">
-					tap anywhere to start
-				</p>
-			{/if}
+		<div class="pb-16 md:pb-24 {showTapPrompt ? 'opacity-100' : 'opacity-0'} transition-opacity duration-1000">
+			<p class="text-slate-300 text-lg md:text-xl font-light tracking-wide animate-pulse-slow">
+				tap anywhere to start
+			</p>
 		</div>
 	</div>
-	
-	<!-- Loading indicator (subtle) -->
-	{#if !assetsLoaded}
-		<div class="absolute bottom-8 left-1/2 transform -translate-x-1/2">
-			<div class="w-1 h-8 bg-slate-600 animate-pulse"></div>
-		</div>
-	{/if}
 </div>
 
 <style>

@@ -2,6 +2,8 @@
     import { onMount } from 'svelte';
     import { Vector } from '$lib/classes/Vector.svelte.js';
     import { scale } from '$lib/stores/configuration.js';
+    import { gameAppearance } from '$lib/stores/gameAppearance.js';
+    
     let {
         node,
         rotationTrigger = 0,
@@ -11,11 +13,28 @@
     let svgContent = $state('');
     let svgKey = $state(0);
 
-    async function loadSvg(type) {
+    // Get the appropriate tileset based on the node's shape and user preferences
+    let selectedTileset = $derived.by(() => {
+        const sides = node.n;
+        let shapeKey;
+        
+        if (sides === 3) shapeKey = 'triangle';
+        else if (sides === 4) shapeKey = 'square';
+        else if (sides === 6) shapeKey = 'hexagon';
+        else return 'loop'; // fallback for other shapes
+        
+        return $gameAppearance.shapeStyles[shapeKey]?.tileset || 'loop';
+    });
+
+    async function loadSvg(type, tileset) {
         try {
             svgContent = '';
             
-            const response = await fetch(`/tilesets/standard/${type}.svg`);
+            // Build the SVG path based on shape sides and tileset
+            const sides = node.n;
+            const svgPath = `/tilesets/${tileset}/${type}.svg`;
+            
+            const response = await fetch(svgPath);
             if (response.ok) {
                 let content = await response.text();
                 content = content.replace(/width="[^"]*"/g, '');
@@ -30,7 +49,7 @@
                 svgContent = content;
                 svgKey++;
             } else {
-                console.warn(`Failed to load SVG: ${type}.svg`);
+                console.warn(`Failed to load SVG: ${svgPath}`);
                 svgContent = '';
             }
         } catch (error) {
@@ -40,12 +59,13 @@
     }
 
     onMount(() => {
-        loadSvg(node.tileType);
+        loadSvg(node.tileType, selectedTileset);
     });
 
+    // Reload SVG when tileType changes OR when tileset preference changes
     $effect(() => {
-        if (node.tileType) {
-            loadSvg(node.tileType);
+        if (node.tileType && selectedTileset) {
+            loadSvg(node.tileType, selectedTileset);
         }
     });
 

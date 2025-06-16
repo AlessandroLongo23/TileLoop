@@ -1,5 +1,5 @@
 <script>
-	import { Volume2, VolumeX, Smartphone, Music } from 'lucide-svelte';
+	import { Volume2, VolumeX, Smartphone, Music, X } from 'lucide-svelte';
 	import { gameSettings, gameStats } from '$lib/stores/gameProgress.js';
 	import { fly, fade } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
@@ -46,7 +46,7 @@
 					onclick={onClose}
 					class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition-colors duration-200"
 				>
-					×
+					<X size={18} />
 				</button>
 			</div>
 
@@ -171,10 +171,10 @@
 							<span class="text-slate-400">Total Moves</span>
 							<span class="text-white">{$gameStats.totalMoves.toLocaleString()}</span>
 						</div>
-						<div class="flex justify-between text-sm">
+						<!-- <div class="flex justify-between text-sm">
 							<span class="text-slate-400">Average Moves/Level</span>
 							<span class="text-white">{$gameStats.averageMovesPerLevel.toFixed(1)}</span>
-						</div>
+						</div> -->
 						<div class="flex justify-between text-sm">
 							<span class="text-slate-400">First Played</span>
 							<span class="text-white">{formatDate($gameStats.firstPlayDate)}</span>

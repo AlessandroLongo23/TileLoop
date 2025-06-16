@@ -19,6 +19,12 @@
     "StatusBar": {
       "style": "dark",
       "backgroundColor": "#18181b"
+    },
+    "Preferences": {
+      "group": "TileLoopGame"
     }
+  },
+  "assets": {
+    "iconPath": "resources/icon-simple.svg"
   }
 }

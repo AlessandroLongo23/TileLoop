@@ -88,8 +88,8 @@ export class Level {
             node.simmetries = simmetries;
 
             node.effects = [];
-            if (node.halfways.some(h => h.connections) && Math.random() < 0.2) 
-                node.effects.push(new Effect('rotate', this.tiling, node));
+            // if (node.halfways.some(h => h.connections) && Math.random() < 0.2) 
+            //     node.effects.push(new Effect('rotate', this.tiling, node));
         }
 
         this.shuffle();
@@ -267,7 +267,7 @@ export class Effect {
     
         if (this.type == 'rotate') {
             this.target = tiling.nodes.filter(n => n.id != node.id && n.halfways.some(h => h.connections)).pickRandom();
-            let choices = Array.from({ length: this.target.n }, (_, i) => (i - (Math.floor(node.n / 2) - 1)));
+            let choices = Array.from({ length: this.target.n }, (_, i) => (i - (Math.floor(node.n / 2) + 1)));
             choices = choices.filter(c => c != 0);
             this.turns = choices.pickRandom();
         }

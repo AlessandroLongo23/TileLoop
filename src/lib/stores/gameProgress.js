@@ -1,4 +1,5 @@
 import { objectStore, variableStore, arrayStore } from 'svelte-capacitor-store';
+import { storage, migrateLocalStorageToMobile } from '$lib/utils/mobileStorage.js';
 
 // Campaign configuration
 export const CHAPTERS_COUNT = 10;
@@ -254,7 +255,7 @@ export function isChapterUnlocked(chapter) {
 	return isChapterCompleted(chapter - 1);
 }
 
-export function completeLevel(chapter, level, stats = {}) {
+export async function completeLevel(chapter, level, stats = {}) {
 	campaignProgress.update(progress => {
 		if (progress[chapter] && progress[chapter][level]) {
 			const levelData = progress[chapter][level];
@@ -288,6 +289,14 @@ export function completeLevel(chapter, level, stats = {}) {
 	
 	// Update global stats
 	updateGlobalStats(stats);
+	
+	// Immediately save progress after level completion
+	try {
+		await saveAllProgress();
+		console.log('Progress saved after level completion');
+	} catch (error) {
+		console.error('Failed to save progress after level completion:', error);
+	}
 }
 
 export function saveCurrentGameState(gameData) {
@@ -384,6 +393,10 @@ function updateGlobalStats(gameData) {
 // Initialize all stores
 export async function initializeGameStores() {
 	try {
+		// First, migrate any existing localStorage data to mobile storage
+		await migrateLocalStorageToMobile();
+		
+		// Then initialize all stores
 		await Promise.all([
 			campaignProgress.init(),
 			currentGameState.init(),
@@ -394,9 +407,143 @@ export async function initializeGameStores() {
 			gameStats.init(),
 			currentGameSession.init()
 		]);
+		
 		console.log('Game stores initialized successfully');
+		
+		// Ensure mobile storage is working by testing it
+		await testMobileStorage();
+		
 	} catch (error) {
 		console.error('Failed to initialize game stores:', error);
+		throw error;
+	}
+}
+
+// Test mobile storage functionality
+async function testMobileStorage() {
+	try {
+		const testKey = 'tileloop-storage-test';
+		const testValue = { test: true, timestamp: Date.now() };
+		
+		// Test write
+		await storage.set(testKey, testValue);
+		console.log('Mobile storage write test: SUCCESS');
+		
+		// Test read
+		const retrieved = await storage.get(testKey);
+		if (retrieved && retrieved.test === true) {
+			console.log('Mobile storage read test: SUCCESS');
+		} else {
+			throw new Error('Retrieved value does not match');
+		}
+		
+		// Clean up test data
+		await storage.remove(testKey);
+		console.log('Mobile storage cleanup test: SUCCESS');
+		
+	} catch (error) {
+		console.error('Mobile storage test failed:', error);
+		// Don't throw here - let the app continue with fallback storage
+	}
+}
+
+// Explicit save functions for critical game data
+export async function saveAllProgress() {
+	try {
+		console.log('Saving all game progress...');
+		
+		// Get current state of all stores
+		const progressData = {
+			campaign: campaignProgress.get(),
+			zenMode: zenModeProgress.get(),
+			timeAttack: timeAttackProgress.get(),
+			precisionMode: precisionModeProgress.get(),
+			settings: gameSettings.get(),
+			stats: gameStats.get(),
+			currentGame: currentGameState.get(),
+			timestamp: Date.now()
+		};
+		
+		// Save to mobile storage as backup
+		await storage.set('tileloop-backup-progress', progressData);
+		console.log('Game progress saved successfully');
+		
+		return true;
+	} catch (error) {
+		console.error('Failed to save game progress:', error);
+		return false;
+	}
+}
+
+export async function loadBackupProgress() {
+	try {
+		console.log('Loading backup game progress...');
+		
+		const backupData = await storage.get('tileloop-backup-progress');
+		if (!backupData) {
+			console.log('No backup progress found');
+			return false;
+		}
+		
+		// Restore data to stores
+		if (backupData.campaign) {
+			campaignProgress.set(backupData.campaign);
+		}
+		if (backupData.zenMode) {
+			zenModeProgress.set(backupData.zenMode);
+		}
+		if (backupData.timeAttack) {
+			timeAttackProgress.set(backupData.timeAttack);
+		}
+		if (backupData.precisionMode) {
+			precisionModeProgress.set(backupData.precisionMode);
+		}
+		if (backupData.settings) {
+			gameSettings.set(backupData.settings);
+		}
+		if (backupData.stats) {
+			gameStats.set(backupData.stats);
+		}
+		if (backupData.currentGame) {
+			currentGameState.set(backupData.currentGame);
+		}
+		
+		console.log('Backup progress loaded successfully');
+		return true;
+	} catch (error) {
+		console.error('Failed to load backup progress:', error);
+		return false;
+	}
+}
+
+// Auto-save progress periodically and on key events
+export function setupAutoSave() {
+	// Save progress every 30 seconds
+	setInterval(async () => {
+		await saveAllProgress();
+	}, 30000);
+	
+	// Save on page visibility change (when app goes to background)
+	if (typeof document !== 'undefined') {
+		document.addEventListener('visibilitychange', async () => {
+			if (document.visibilityState === 'hidden') {
+				await saveAllProgress();
+				console.log('Progress saved due to app going to background');
+			}
+		});
+	}
+	
+	// Save on beforeunload (when app is closing)
+	if (typeof window !== 'undefined') {
+		window.addEventListener('beforeunload', async () => {
+			await saveAllProgress();
+		});
+		
+		// Also save on page focus loss
+		window.addEventListener('blur', async () => {
+			await saveAllProgress();
+			console.log('Progress saved due to window blur');
+		});
 	}
 }
 
