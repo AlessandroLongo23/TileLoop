@@ -25,6 +25,6 @@
     }
   },
   "assets": {
-    "iconPath": "resources/icon-simple.svg"
+    "iconPath": "resources/icon.svg"
   }
 }

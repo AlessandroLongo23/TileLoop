@@ -86,7 +86,7 @@ export class Level {
             node.isRotating = false;
             node.svgTurns = turns;
             node.simmetries = simmetries;
-
+ 
             node.effects = [];
             // if (node.halfways.some(h => h.connections) && Math.random() < 0.2) 
             //     node.effects.push(new Effect('rotate', this.tiling, node));
