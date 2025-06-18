@@ -63,11 +63,13 @@
                     `viewBox="0 0 600 600" width="${$scale * scalePolygon + 1}px" height="${$scale * scalePolygon + 1}px"`
                 );
 
-                content = content.replace('id="pathMask"', 'id="pathMask_' + tileset + "_" + node.id + '"');
-                content = content.replace('url(#pathMask)', 'url(#pathMask_' + tileset + "_" + node.id + ')');
-                content = content.replace('id="redGradient"', 'id="redGradient_' + tileset + "_" + node.id + '"');
-                content = content.replace('url(#redGradient)', 'url(#redGradient_' + tileset + "_" + node.id + ')');
-                content = content.replace('id="gradientStop2" offset="20%"', 'id="gradientStop2" offset="' + (20 * scalePolygon) + '%"');
+                content = content
+                    .replace('id="pathMask"', 'id="pathMask_' + tileset + "_" + node.id + '"')
+                    .replace('url(#pathMask)', 'url(#pathMask_' + tileset + "_" + node.id + ')')
+                    .replace('id="redGradient"', 'id="redGradient_' + tileset + "_" + node.id + '"')
+                    .replace('url(#redGradient)', 'url(#redGradient_' + tileset + "_" + node.id + ')')
+                    .replace('id="gradientStop2" offset="20%"', 'id="gradientStop2" offset="' + (20 * scalePolygon) + '%"')
+                    .replace(/<filter.*?>.*?<\/filter>/gs, '')
 
                 svgContent = content;
             } else {
@@ -137,7 +139,7 @@
 </script>
 
 <div 
-    class="absolute transition-transform duration-200 ease-in-out tile-button pointer-events-none"
+    class="absolute transition-transform duration-300 ease-in-out tile-button pointer-events-none"
     style="
         left: {node.screenPosition.x}px; 
         top: {node.screenPosition.y}px; 
@@ -201,7 +203,7 @@
         /* stroke: var(--effect-border-stroke-color) !important;
         stroke-width: var(--effect-border-stroke-width) !important; */
         fill: transparent !important;
-        transition: stroke-width 300ms ease-out;
+        transition: stroke-width 500ms ease-out;
     }
 
     .tile-button :global(#gradientStop1) {

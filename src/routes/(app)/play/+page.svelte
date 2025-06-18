@@ -282,7 +282,19 @@
             }, 100);
         }
     }
+
+    let title = $derived.by(() => {
+        if (gameMode === 'campaign') {
+            return `TileLoop / Campaign lvl. ${chapterNum}-${levelNum}`;
+        } else {
+            return `TileLoop / ${gameMode.capitalize()} lvl. ${levelNum}`;
+        }
+    });
 </script>
+
+<svelte:head>
+	<title>{title}</title>
+</svelte:head>
 
 <div class="flex h-screen w-full bg-zinc-900 overflow-hidden relative">
     <GameHeader 
