@@ -920,21 +920,88 @@
 		if (polygonGuide) polygonGuide.remove();
 		const arcGuides = svgElement.querySelectorAll('.arc-guide');
 		arcGuides.forEach(guide => guide.remove());
-		// const borderPolygon = svgElement.querySelector('#border-polygon');
-		// if (borderPolygon) borderPolygon.remove();
 		const splineGuides = svgElement.querySelectorAll('.spline-guide');
 		splineGuides.forEach(guide => guide.remove());
 		
-		const serializer = new XMLSerializer();
-		const svgString = serializer.serializeToString(svgElement);
+		// Extract elements and convert to new format
+		const borderPolygon = svgElement.querySelector('#border-polygon');
+		const polygonPoints = borderPolygon ? borderPolygon.getAttribute('points') : '';
 		
-		const blob = new Blob([svgString], { type: 'image/svg+xml' });
+		// Get all clipped groups and extract internal elements
+		const clippedGroups = svgElement.querySelectorAll(`g[clip-path*="polygon-clip-${selectedShape}"]`);
+		let internalElements = '';
+		for (const group of clippedGroups) {
+			const content = group.innerHTML;
+			// Only include groups that have actual drawing elements (not just border)
+			if (content.includes('<path') || content.includes('<line') || content.includes('<circle') || content.includes('<rect')) {
+				internalElements += content;
+			}
+		}
+		
+		// Create new SVG with glowing border format
+		const newSvgContent = createGlowingSVG(polygonPoints, internalElements, selectedShape);
+		
+		const blob = new Blob([newSvgContent], { type: 'image/svg+xml' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
 		a.download = `tileset-${selectedShape}-sided.svg`;
 		a.click();
 		URL.revokeObjectURL(url);
+	}
+
+	function createGlowingSVG(polygonPoints, internalElements, sides) {
+		// Convert internal elements to mask format
+		const maskElements = internalElements
+			.replace(/<polygon[^>]*id="border-polygon"[^>]*\/?>/g, '') // Remove border polygon
+			.replace(/stroke="#[^"]*"/g, 'stroke="white"')
+			.replace(/fill="[^"]*"/g, 'fill="none"');
+		
+		return `<svg xmlns="http://www.w3.org/2000/svg" class="s-BgHh72J5KvB0" viewBox="0 0 600 600" width="600" height="600">
+    <defs class="s-BgHh72J5KvB0">
+        <clipPath id="polygon-clip-${sides}" class="s-BgHh72J5KvB0">
+            <polygon class="s-BgHh72J5KvB0" points="${polygonPoints}"/>
+        </clipPath>
+        <radialGradient id="bgGradient" cx="50%" cy="66%" r="50%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1"/>
+            <stop offset="30%" style="stop-color:#ffffff;stop-opacity:1"/>
+            <stop offset="100%" style="stop-color:#ffcccc;stop-opacity:1"/>
+        </radialGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="8" result="tinyBlur"/>
+            <feGaussianBlur stdDeviation="16" result="smallBlur"/>
+            <feGaussianBlur stdDeviation="32" result="mediumBlur"/>
+            <feGaussianBlur stdDeviation="64" result="largeBlur"/>
+            <feGaussianBlur stdDeviation="128" result="hugeBlur"/>
+            <feMerge>
+                <feMergeNode in="hugeBlur"/>
+                <feMergeNode in="largeBlur"/>
+                <feMergeNode in="mediumBlur"/>
+                <feMergeNode in="smallBlur"/>
+                <feMergeNode in="tinyBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <radialGradient id="redGradient" cx="50%" cy="50%" r="100%">
+            <stop id="gradientStop1" offset="7%" style="stop-color:#1e293b;stop-opacity:1"/>
+            <stop id="gradientStop2" offset="20%" style="stop-color:#1e293b;stop-opacity:1"/>
+        </radialGradient>
+        <mask id="pathMask">
+            <rect width="100%" height="100%" fill="black"/>
+            ${maskElements}
+        </mask>
+    </defs>
+
+    <polygon fill="white" id="base-polygon" stroke="none" class="s-BgHh72J5KvB0" points="${polygonPoints}"/>
+    
+    <g clip-path="url(#polygon-clip-${sides})" class="s-BgHh72J5KvB0">
+        <polygon id="border-polygon" fill="none" stroke="#ff0000" stroke-width="0" filter="url(#glow)" class="s-BgHh72J5KvB0" points="${polygonPoints}"/>
+    </g>
+
+    <g clip-path="url(#polygon-clip-${sides})" class="s-BgHh72J5KvB0">
+        <rect width="100%" height="100%" fill="url(#redGradient)" mask="url(#pathMask)" class="s-BgHh72J5KvB0"/>
+    </g>
+</svg>`;
 	}
 
 	// Initialize history

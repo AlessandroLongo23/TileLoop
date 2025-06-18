@@ -20,6 +20,7 @@ export class Level {
         this.generateConnections();
         this.convertTilingToTiles();
         this.checkIfSolved();
+        this.addEffects();
 
         this.isFrozen = false;
     }
@@ -82,14 +83,12 @@ export class Level {
             node.id = `tile-${i}-${node.centroid.x.toFixed(3)}-${node.centroid.y.toFixed(3)}`;
             
             node.tileType = tileType;
-            node.mirrored = mirrored;
+            if (mirrored) node.mirror();
             node.isRotating = false;
             node.svgTurns = turns;
             node.simmetries = simmetries;
  
             node.effects = [];
-            // if (node.halfways.some(h => h.connections) && Math.random() < 0.2) 
-            //     node.effects.push(new Effect('rotate', this.tiling, node));
         }
 
         this.shuffle();
@@ -106,6 +105,12 @@ export class Level {
         return [tileType, mirrored, turns, simmetries];
     }
 
+    addEffects = () => {
+        for (const node of this.tiling.nodes)
+            if (node.halfways.some(h => h.connections) && Math.random() < 0.2)
+                node.effects.push(new Effect(Math.random() < 0.5 ? 'rotate' : 'rotate', this.tiling, node));
+    }
+    
     shuffle = () => {
         this.minMovesToSolve = 0;
         for (const node of this.tiling.nodes) {
@@ -154,118 +159,14 @@ export class Level {
         
         return solved;
     }
-
-    draw(p5) {
-        // this.tiling.show(p5);
-        
-        p5.noFill();
-        p5.stroke(0);
-        p5.strokeWeight(0.2);
-
-        for (let node of this.tiling.nodes) {
-            p5.noFill();
-            p5.strokeWeight(0.01);
-            p5.stroke(0, 0, 0, 0.1);
-            p5.beginShape();
-            for (let vertex of node.vertices) {
-                p5.vertex(vertex.x, vertex.y);
-            }
-            p5.endShape(p5.CLOSE);
-
-            p5.strokeWeight(0.05);
-            let halfwaysWithLoop = node.halfways.filter(h => h.connections);
-            
-            if (halfwaysWithLoop.length == 0) 
-                continue;
-            
-            if (halfwaysWithLoop.length == 1) {
-                p5.stroke(0, 0, 0);
-                p5.line(halfwaysWithLoop[0].x, halfwaysWithLoop[0].y, node.centroid.x, node.centroid.y);
-                
-                p5.fill(0, 0, 0);
-                p5.noStroke();
-                p5.ellipse(node.centroid.x, node.centroid.y, 0.2);
-                continue;
-            }
-
-            // Calculate gaps between consecutive halfways
-            let gaps = [];
-            for (let i = 0; i < halfwaysWithLoop.length; i++) {
-                let current = halfwaysWithLoop[i];
-                let next = halfwaysWithLoop.next(i);
-                let gap = Vector.distance(current, next);
-                gaps.push({ index: i, gap: gap });
-            }
-
-            // Check if all gaps are the same (within tolerance)
-            let allGapsEqual = true;
-            let tolerance = 0.01; // Small tolerance for floating point comparison
-            for (let i = 1; i < gaps.length; i++) {
-                if (Math.abs(gaps[i].gap - gaps[0].gap) > tolerance) {
-                    allGapsEqual = false;
-                    break;
-                }
-            }
-
-            // Find the index of the biggest gap if gaps are not equal
-            let skipIndex = -1;
-            if (!allGapsEqual) {
-                let maxGap = Math.max(...gaps.map(g => g.gap));
-                skipIndex = gaps.find(g => g.gap === maxGap).index;
-            }
-
-            for (let i = 0; i < halfwaysWithLoop.length; i++) {
-                // Skip drawing arc for the biggest gap if gaps are not equal
-                if (!allGapsEqual && i === skipIndex) {
-                    continue;
-                }
-
-                let h = halfwaysWithLoop[i];
-                let next = halfwaysWithLoop.next(i);
-
-                // Draw arc between two consecutive halfways if both have loop = true
-                let s1 = Vector.sub(h, node.centroid).rotate(Math.PI / 2);
-                let s2 = Vector.sub(next, node.centroid).rotate(Math.PI / 2);
-                let intersection = computeIntersection(h, s1, next, s2);
-                if (!intersection) {
-                    p5.stroke(0, 0, 0);
-                    p5.line(h.x, h.y, next.x, next.y);
-                    continue;
-                }
-
-                let v1 = Vector.sub(h, intersection);
-                let v2 = Vector.sub(next, intersection);
-                let dist = Vector.distance(h, intersection);
-                let endAngle = v1.heading();    
-                let startAngle = v2.heading();
-
-                if (startAngle > endAngle) {
-                    let temp = startAngle;
-                    startAngle = endAngle;
-                    endAngle = temp;
-                }
-                
-                // Ensure we draw the shorter arc by adjusting angles if needed
-                let angleDiff = endAngle - startAngle;
-                if (angleDiff > Math.PI) {
-                    let temp = startAngle;
-                    startAngle = endAngle;
-                    endAngle = temp;
-                }
-                
-                p5.stroke(0, 0, 0);
-                p5.arc(intersection.x, intersection.y, 2 * dist, 2 * dist, startAngle, endAngle);
-            }
-        }
-    }
 }
 
 export class Effect {
     constructor(type, tiling, node) {
         this.type = type;
-        this.color = '#aa0000';
-    
+        
         if (this.type == 'rotate') {
+            this.color = '#aa0000';
             this.target = tiling.nodes.filter(n => n.id != node.id && n.halfways.some(h => h.connections)).pickRandom();
             let choices = Array.from({ length: this.target.n }, (_, i) => (i - (Math.floor(node.n / 2) + 1)));
             choices = choices.filter(c => c != 0);
@@ -273,7 +174,8 @@ export class Effect {
         }
 
         else if (this.type == 'mirror') {
-            this.target = tiling.nodes.filter(n => n.id != node.id && n.halfways.some(h => h.connections) && n.asymmetric).pickRandom();
+            this.color = '#0000aa';
+            this.target = tiling.nodes.filter(n => n.id != node.id && n.halfways.some(h => h.connections) && n.simmetries.length == 0).pickRandom();
         }
     }
 

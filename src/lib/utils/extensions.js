@@ -41,17 +41,72 @@ Array.prototype.cycleToMinimumLexicographicalOrder = function() {
     return [min, mirrored, turns];
 }
 
-Array.prototype.getSimmetries = function() {
-    let simmetries = new Set();
+Array.prototype.isAxialSymmetric = function() {
+    let isSymmetric = false;
+    let subarrayLength = this.length / 2 + 1;
     for (let i = 0; i < this.length; i++) {
-        let rotated = this.rotate(i);
-        if (rotated.palidrome()) {
-            simmetries.add('axial');
-            break;
+        if (this.subarray(i, subarrayLength).isEqual(this.subarray(i, -subarrayLength)))
+            isSymmetric = true;
+    }
+
+    return isSymmetric;
+}
+
+Array.prototype.subarray = function(start, offset) {
+    let subarray = [];
+    if (offset > 0) {
+        for (let i = 0; i < offset; i++) {
+            subarray.push(this.next(start, i));
+        }
+    } else {
+        for (let i = 0; i < -offset; i++) {
+            subarray.push(this.prev(start, i));
         }
     }
 
-    let divisors = getDivisors(this.length);
+    return subarray;
+}
+
+Array.prototype.getSimmetries = function() {
+    let simmetries = [];
+    let temp = [...this];
+
+    for (let i = 0; i < temp.length; i++) {
+        let rotated = temp.rotate(i);
+        if (rotated.palidrome()) {
+            if (!simmetries.some(s => s.type == 'axial' && s.subtype == 'vertex')) {
+                simmetries.push({
+                    type: 'axial',
+                    subtype: 'vertex',
+                });
+            }
+        }
+    }
+
+    if (this.isAxialSymmetric()) {
+        simmetries.push({
+            type: 'axial',
+            subtype: 'edge',
+        });
+    }
+
+    // if (temp.length % 2 == 0) {
+    //     temp.push(temp[0]);
+
+    //     for (let i = 0; i < temp.length; i++) {
+    //         let rotated = temp.rotate(i);
+    //         if (rotated.palidrome()) {
+    //             if (!simmetries.some(s => s.type == 'axial' && s.subtype == 'edge')) {
+    //                 simmetries.push({
+    //                     type: 'axial',
+    //                     subtype: 'edge',
+    //                 });
+    //             }
+    //         }
+    //     }
+    // }
+
+    let divisors = getDivisors(this.length).filter(d => d != 1);
     for (let divisor of divisors) {
         let isSimmetric = true;
         let step = this.length / divisor;
@@ -65,7 +120,10 @@ Array.prototype.getSimmetries = function() {
         }
 
         if (isSimmetric) {
-            simmetries.add(divisor);
+            simmetries.push({
+                type: 'rotational',
+                angle: 360 / divisor,
+            });
         }
     }
 
@@ -81,7 +139,11 @@ function getDivisors(n) {
 }
 
 Array.prototype.palidrome = function() {
-    return this.slice().reverse().isEqual(this);
+    for (let i = 0; i < this.length; i++)
+        if (this[i] != this[this.length - i - 1])
+            return false;
+
+    return true;
 }
 
 Array.prototype.fromBase = function(base) {
@@ -108,6 +170,22 @@ Array.prototype.cyclicallyInclude = function(array) {
     }
 
     return false;
+}
+
+Array.prototype.simmetrize = function(center = null) {
+    if (center == null) {
+        let simmetrized = [];
+        for (let i = 0; i < this.length / 2 + 1; i++) {
+            simmetrized.push(this[this.length - i - 1]);
+        }
+        return simmetrized;
+    } else {
+        let simmetrized = [];
+        for (let i = center; i < this.length + center; i++) {
+            simmetrized.push(this[(center - (i - center) + this.length * 100) % this.length]);
+        }
+        return simmetrized;
+    }
 }
 
 Array.prototype.pickRandom = function(weights = Array.from({ length: this.length }, () => 1 / this.length)) {
@@ -165,4 +243,12 @@ Array.prototype.isEqualOrChiral = function(array) {
     }
 
     return false;
+}
+
+Array.prototype.sum = function() {
+    let sum = 0;
+    for (let i = 0; i < this.length; i++) {
+        sum += this[i];
+    }
+    return sum;
 }

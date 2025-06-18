@@ -27,7 +27,6 @@
 	const precisionCurrentProgress = $derived(getCurrentModeProgress('precision'));
 
 	onMount(() => {
-		// Staggered entrance animation
 		setTimeout(() => showContent = true, 100);
 		setTimeout(() => buttonsReady = true, 300);
 	});
@@ -166,10 +165,10 @@
 					<div class="absolute inset-0 bg-gradient-to-r from-slate-700/20 to-slate-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 					<div class="relative flex flex-col items-center gap-2">
 						<div class="flex flex-row items-center justify-center gap-2">
-							<ls.Target size={16} class="text-cyan-400 -mb-[2px]" />
+							<ls.Target size={16} class="text-indigo-400 -mb-[2px]" />
 							<span class="text-lg">Precision</span>
 						</div>
-						<span class="text-xs text-cyan-400 font-semibold">
+						<span class="text-xs text-indigo-400 font-semibold">
 							Level {precisionCurrentProgress.currentLevel}
 						</span>
 					</div>

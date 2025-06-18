@@ -2,6 +2,7 @@
     import { selectedTiling, scale } from '$lib/stores/configuration.js';
     import { Vector } from '$lib/classes/Vector.svelte.js';
     import { sounds } from '$lib/utils/sounds.js';
+    
     import Tile from './Tile.svelte';
 
     let {

@@ -2,8 +2,10 @@
     import { onMount } from 'svelte';
     import { Vector } from '$lib/classes/Vector.svelte.js';
     import { scale } from '$lib/stores/configuration.js';
+    import { currentGameSession } from '$lib/stores/gameProgress.js';
     import { gameAppearance } from '$lib/stores/gameAppearance.js';
-    
+    import { themes } from '$lib/stores/data.js';
+
     let {
         node,
         rotationTrigger = 0,
@@ -11,9 +13,8 @@
     } = $props();
 
     let svgContent = $state('');
-    let svgKey = $state(0);
+    let isLoading = $state(false);
 
-    // Get the appropriate tileset based on the node's shape and user preferences
     let selectedTileset = $derived.by(() => {
         const sides = node.n;
         let shapeKey;
@@ -21,52 +22,55 @@
         if (sides === 3) shapeKey = 'triangle';
         else if (sides === 4) shapeKey = 'square';
         else if (sides === 6) shapeKey = 'hexagon';
-        else return 'loop'; // fallback for other shapes
+        else return 'loop';
         
         return $gameAppearance.shapeStyles[shapeKey]?.tileset || 'loop';
     });
 
     async function loadSvg(type, tileset) {
+        if (!type || !tileset) return;
+        
+        isLoading = true;
+        
         try {
-            svgContent = '';
-            
-            // Build the SVG path based on shape sides and tileset
-            const sides = node.n;
             const svgPath = `/tilesets/${tileset}/${type}.svg`;
-            
             const response = await fetch(svgPath);
+            
             if (response.ok) {
                 let content = await response.text();
-                content = content.replace(/width="[^"]*"/g, '');
-                content = content.replace(/height="[^"]*"/g, '');
+                
+                content = content.replace(
+                    /viewBox="0 0 600 600"[^>]*width="600"[^>]*height="600"/g,
+                    `viewBox="0 0 600 600" width="${$scale * scalePolygon + 1}px" height="${$scale * scalePolygon + 1}px"`
+                );
 
-                content = content.replace(/class="bg-white[^"]*"/g, '');
-                content = content.replace(/style="[^"]*"/g, '');
+                content = content.replace('id="pathMask"', 'id="pathMask_' + tileset + "_" + node.id + '"');
+                content = content.replace('url(#pathMask)', 'url(#pathMask_' + tileset + "_" + node.id + ')');
+                content = content.replace('id="redGradient"', 'id="redGradient_' + tileset + "_" + node.id + '"');
+                content = content.replace('url(#redGradient)', 'url(#redGradient_' + tileset + "_" + node.id + ')');
+                content = content.replace('id="gradientStop2" offset="20%"', 'id="gradientStop2" offset="' + (20 * scalePolygon) + '%"');
 
-                content = content.replace(/fill="white"/g, 'fill="none"');
-
-                content = content.replace('<svg', '<svg preserveAspectRatio="xMidYMid meet"');
                 svgContent = content;
-                svgKey++;
             } else {
                 console.warn(`Failed to load SVG: ${svgPath}`);
                 svgContent = '';
             }
         } catch (error) {
-            console.error('Failed to load SVG:', error);
+            console.error(`Error loading SVG:`, error);
             svgContent = '';
+        } finally {
+            isLoading = false;
         }
     }
 
+    // Load SVG on mount
     onMount(() => {
         loadSvg(node.tileType, selectedTileset);
     });
 
-    // Reload SVG when tileType changes OR when tileset preference changes
+    // Reload when tileType or tileset changes
     $effect(() => {
-        if (node.tileType && selectedTileset) {
-            loadSvg(node.tileType, selectedTileset);
-        }
+        loadSvg(node.tileType, selectedTileset);
     });
 
     let offset = $derived.by(() => {
@@ -80,20 +84,20 @@
 
         return off;
     });
+    
     let scalePolygon = $derived(2 / (2 * Math.sin(Math.PI / node.n)));
     
-    let currentRotation = $derived(rotationTrigger >= 0 ? node.rotation : 0);
+    let transforms = $derived(rotationTrigger >= 0 ? `rotate(${startRotation * 180 / Math.PI}deg) ${node.svgTransform}` : node.svgTransform);
     let halfways = $derived(rotationTrigger >= 0 ? node.halfways.map(h => new Object({ x: h.x, y: h.y, connections: h.connections, matched: h.matched })) : []);
-    let totalRotation = $derived.by(() => {
+    let startRotation = $derived.by(() => {
         let r = 0;
         r += offset;
         r += node.angle;
-        r += currentRotation;
         if (node.mirrored) {
             let mirrorTurns = 0;
-            if (node.n == 3) mirrorTurns = 2;
-            else if (node.n == 4) mirrorTurns = 1;
-            else if (node.n == 6) mirrorTurns = 1;
+            if (node.n == 3) mirrorTurns = 0;
+            else if (node.n == 4) mirrorTurns = 0;
+            else if (node.n == 6) mirrorTurns = 0;
             r -= ((node.svgTurns - mirrorTurns) * (2 * Math.PI / node.n));
         } else {
             r += (node.svgTurns * (2 * Math.PI / node.n));
@@ -101,13 +105,18 @@
         return r;
     });
 
-    // Calculate border stroke width based on celebration stage
     let borderStrokeWidth = $derived.by(() => {
-        if (celebrationStage >= 0) {
-            // Animate to zero during stage 0
-            return 0;
-        }
-        return 4 / scalePolygon;
+        if (celebrationStage >= 0) return 0;
+
+        return 2 / scalePolygon;
+    });
+
+    let lineStrokeWidth = $derived(32 / scalePolygon);
+
+    let effectStrokeWidth = $derived.by(() => {
+        if (celebrationStage >= 0 || node.effects.length == 0) return 0;
+
+        return 4;
     });
 </script>
 
@@ -116,23 +125,24 @@
     style="
         left: {node.screenPosition.x}px; 
         top: {node.screenPosition.y}px; 
-        width: {$scale * scalePolygon + 1}px; 
-        height: {$scale * scalePolygon + 1}px;
-        transform: translate(-50%, -50%) rotate({totalRotation * 180 / Math.PI}deg) scaleX({node.mirrored ? -1 : 1});
-        stroke-width: {40 / scalePolygon}px;
+        transform: translate(-50%, -50%) {transforms};
         --border-stroke-width: {borderStrokeWidth}px;
-        --border-stroke-color: {node.effects.length > 0 ? node.effects[0].color : '#aaa'};
+        --border-stroke-color: #888;
+        --line-stroke-color: #fff;
+        --line-stroke-width: {lineStrokeWidth}px;
+        --effect-border-stroke-width: {effectStrokeWidth}px;
+        --effect-border-stroke-color: {node.effects.length > 0 ? node.effects[0].color : '#aaa'};
+        --gradient-stop-1-color: {halfways.reduce((acc, h) => acc + h.connections, 0) == 1 && halfways.filter(h => h.connections == 1)[0].matched ? $themes['default'].colors[$currentGameSession.gameMode] : '#000000'};
+        z-index: {node.effects.length > 0 ? 10 : 0};
     "
 >
     {#if svgContent}
-        {#key svgKey}
-            <div class="w-full h-full">
-                {@html svgContent}
-            </div>
-        {/key}
-    {:else}
-        <div class="w-full h-full flex items-center justify-center text-xs">
-            Loading...
+        <div class="w-full h-full">
+            {@html svgContent}
+        </div>
+    {:else if !isLoading}
+        <div class="w-full h-full flex items-center justify-center text-xs text-red-500">
+            Error loading {node.tileType}
         </div>
     {/if}
 </div>
@@ -157,20 +167,50 @@
 {/each} -->
 
 <style>
-    .tile-button :global(svg) {
-        display: block;
+    .tile-button {
+        background: transparent !important;
     }
-
-    .tile-button :global(#border-polygon) {
-        fill: none;
-        /* stroke: var(--border-stroke-color); */
+    
+    .tile-button :global(#base-polygon) {
+        fill: transparent !important;
+        stroke: var(--border-stroke-color);
         stroke-width: var(--border-stroke-width);
+    }
+    
+    .tile-button :global(polygon),
+    .tile-button :global(rect:not([mask*="pathMask"])),
+    .tile-button :global(circle),
+    .tile-button :global(ellipse) {
+        fill: transparent !important;
+    }
+    
+    .tile-button :global(path:not(#base-polygon):not(#border-polygon)),
+    .tile-button :global(line),
+    .tile-button :global(circle) {
+        stroke: var(--line-stroke-color) !important;
+        stroke-width: var(--line-stroke-width) !important;
+        fill: none !important;
+        opacity: 1 !important;
+        transition: stroke-width 300ms ease-out;
+    }
+    
+    .tile-button :global(#border-polygon) {
+        /* stroke: var(--effect-border-stroke-color) !important;
+        stroke-width: var(--effect-border-stroke-width) !important; */
+        fill: transparent !important;
         transition: stroke-width 300ms ease-out;
     }
 
-    .tile-button div {
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .tile-button :global(#gradientStop1) {
+        stop-color: var(--gradient-stop-1-color) !important;
+        transition: stop-color 300ms ease-out;
+    }
+
+    .tile-button :global(#gradientStop2) {
+        offset: 90% !important;
+    }
+
+    .tile-button :global(svg) {
+        background: transparent !important;
     }
 </style>

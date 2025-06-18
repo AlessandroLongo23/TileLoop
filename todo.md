@@ -7,14 +7,14 @@
 ### Feedback
 
 - [x] music (on/off)
-- [ ] sound (on/off)
+- [x] sound (on/off)
 - [ ] vibration (on/off)
 
 ### Customization
 
 - [ ] tiles border (on/off)
 - [ ] palette (all game modes)
-- [ ] tileset
+- [x] tileset
 
 ## UI
 
@@ -24,6 +24,8 @@
 ## Audio
 
 - [x] add sound and music
+
+## Appearance settings
 
 ## Tileset
 
@@ -37,6 +39,7 @@
 
 ## Game mechanics
 
-- [x] linked tiles
-- [ ] tile mirror action
+- [x] linked tiles (rotation and mirroring)
+- [ ] camouflage (+- connection)
+- [ ] swap ???
 - [ ] dual glitch

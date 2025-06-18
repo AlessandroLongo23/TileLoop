@@ -18,6 +18,9 @@ export class Polygon {
         this.state = 0;
         this.nextState = 0;
 
+        this.mirrored = false;
+        this.svgTransform = '';
+
         this.calculateCentroid();
         this.calculateVertices();
         this.calculateHalfways();
@@ -137,9 +140,21 @@ export class Polygon {
     rotate(turns = 1) {
         this.turns += turns;
         this.rotation = this.turns * 2 * Math.PI / this.n;
+        let sign = this.mirrored ? -1 : 1;
+        this.svgTransform += `rotate(${sign * turns * 360 / this.n}deg) `;
 
         this.calculateVertices();
         this.calculateHalfways();
+    }
+
+    mirror() {
+        let connections = this.halfways.map(h => h.connections).simmetrize(1);
+        for (let i = 0; i < this.halfways.length; i++) {
+            this.halfways[i].connections = connections[i];
+        }
+        
+        this.svgTransform += `scaleX(-1) `;
+        this.mirrored = !this.mirrored;
     }
 }
 
