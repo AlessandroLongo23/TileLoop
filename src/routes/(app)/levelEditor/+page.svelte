@@ -409,69 +409,71 @@
         {checkForTilingChange()}
         
         {#if level?.tiling?.nodes}
-            <!-- Level Renderer -->
-            <div class="relative w-full h-full">
-                {#each level.tiling.nodes as node}
-                    <!-- svelte-ignore a11y_click_events_have_key_events -->
-                    <!-- svelte-ignore a11y_no_static_element_interactions -->
-                    <div
-                        class="absolute cursor-pointer transition-transform hover:scale-105 {isEditorMode ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}"
-                        style="
-                            left: {node.screenPosition.x}px; 
-                            top: {node.screenPosition.y}px; 
-                            transform: translate(-50%, -50%);
-                        "
-                        onclick={(e) => isEditorMode ? handleTileClick(e, node) : null}
-                    >
-                        <Tile 
-                            {node}
-                            rotationTrigger={renderTrigger}
-                            celebrationStage={-1}
-                        />
-                        
-                        <!-- Connection Points Overlay (Editor Mode Only) -->
-                        {#if isEditorMode && showConnectionPoints}
-                            {#each node.halfways as halfway, i}
-                                {@const temp = Vector.sub(new Vector(halfway.x, halfway.y), node.centroid)}
-                                <!-- svelte-ignore a11y_click_events_have_key_events -->
-                                <!-- svelte-ignore a11y_no_static_element_interactions -->
-                                <div
-                                    class="absolute flex items-center justify-center cursor-pointer z-20"
-                                    style="
-                                        left: {Math.round(node.screenPosition.x)}px;
-                                        top: {Math.round(node.screenPosition.y)}px;
-                                        transform: translate({temp.x * level.scale * 0.8}px, {temp.y * level.scale * 0.8}px);
-                                        width: 20px;
-                                        height: 20px;
-                                        margin-left: -10px;
-                                        margin-top: -10px;
-                                    "
-                                    onclick={(e) => {
-                                        e.stopPropagation();
-                                        cycleConnection(halfway);
-                                    }}
-                                >
-                                    <!-- Connection Indicator -->
-                                    <div class="relative">
-                                        {#if halfway.connections === 0}
-                                            <div class="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-lg hover:scale-125 transition-transform"></div>
-                                        {:else if halfway.connections === 1}
-                                            <div class="w-4 h-4 rounded-full bg-yellow-500 border-2 border-white shadow-lg hover:scale-125 transition-transform"></div>
-                                        {:else if halfway.connections === 2}
-                                            <div class="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-lg hover:scale-125 transition-transform"></div>
-                                        {/if}
-                                        
-                                        <!-- Connection Count -->
-                                        <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-zinc-800 text-white text-xs font-bold flex items-center justify-center shadow-md">
-                                            {halfway.connections || 0}
+            {#key level.id}
+                <!-- Level Renderer -->
+                <div class="relative w-full h-full">
+                    {#each level.tiling.nodes as node (node.id)}
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
+                        <!-- svelte-ignore a11y_no_static_element_interactions -->
+                        <div
+                            class="absolute cursor-pointer transition-transform hover:scale-105 {isEditorMode ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}"
+                            style="
+                                left: {node.screenPosition.x}px; 
+                                top: {node.screenPosition.y}px; 
+                                transform: translate(-50%, -50%);
+                            "
+                            onclick={(e) => isEditorMode ? handleTileClick(e, node) : null}
+                        >
+                            <Tile 
+                                {node}
+                                trigger={renderTrigger}
+                                celebrationStage={-1}
+                            />
+                            
+                            <!-- Connection Points Overlay (Editor Mode Only) -->
+                            {#if isEditorMode && showConnectionPoints}
+                                {#each node.halfways as halfway, i}
+                                    {@const temp = Vector.sub(new Vector(halfway.x, halfway.y), node.centroid)}
+                                    <!-- svelte-ignore a11y_click_events_have_key_events -->
+                                    <!-- svelte-ignore a11y_no_static_element_interactions -->
+                                    <div
+                                        class="absolute flex items-center justify-center cursor-pointer z-20"
+                                        style="
+                                            left: {Math.round(node.screenPosition.x)}px;
+                                            top: {Math.round(node.screenPosition.y)}px;
+                                            transform: translate({temp.x * level.scale * 0.8}px, {temp.y * level.scale * 0.8}px);
+                                            width: 20px;
+                                            height: 20px;
+                                            margin-left: -10px;
+                                            margin-top: -10px;
+                                        "
+                                        onclick={(e) => {
+                                            e.stopPropagation();
+                                            cycleConnection(halfway);
+                                        }}
+                                    >
+                                        <!-- Connection Indicator -->
+                                        <div class="relative">
+                                            {#if halfway.connections === 0}
+                                                <div class="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-lg hover:scale-125 transition-transform"></div>
+                                            {:else if halfway.connections === 1}
+                                                <div class="w-4 h-4 rounded-full bg-yellow-500 border-2 border-white shadow-lg hover:scale-125 transition-transform"></div>
+                                            {:else if halfway.connections === 2}
+                                                <div class="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-lg hover:scale-125 transition-transform"></div>
+                                            {/if}
+                                            
+                                            <!-- Connection Count -->
+                                            <div class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-zinc-800 text-white text-xs font-bold flex items-center justify-center shadow-md">
+                                                {halfway.connections || 0}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            {/each}
-                        {/if}
-                    </div>
-                {/each}
-            </div>
+                                {/each}
+                            {/if}
+                        </div>
+                    {/each}
+                </div>
+            {/key}
             
             <!-- Instructions Overlay -->
             {#if isEditorMode}

@@ -8,12 +8,31 @@
 
     let {
         node,
-        rotationTrigger = 0,
+        trigger = 0,
         celebrationStage = -1
     } = $props();
 
     let svgContent = $state('');
     let isLoading = $state(false);
+
+    let scalePolygon = $state(0);
+    let lineStrokeWidth = $state(0);
+    let startRotation = $state(0);
+    let borderStrokeWidth = $state(0);
+    let effectStrokeWidth = $state(0);
+        
+    let transforms = $state(node.svgTransform);
+    let halfways = $state([]);
+
+    onMount(() => {
+        loadSvg(node.tileType, selectedTileset);
+
+        scalePolygon = 2 / (2 * Math.sin(Math.PI / node.n));
+        lineStrokeWidth = 32 / scalePolygon;
+        borderStrokeWidth = 2 / scalePolygon;
+        startRotation = calculateStartRotation();
+        effectStrokeWidth = node.effects.length > 0 ? 3 : 0;
+    });
 
     let selectedTileset = $derived.by(() => {
         const sides = node.n;
@@ -63,17 +82,11 @@
         }
     }
 
-    // Load SVG on mount
-    onMount(() => {
-        loadSvg(node.tileType, selectedTileset);
-    });
-
-    // Reload when tileType or tileset changes
     $effect(() => {
         loadSvg(node.tileType, selectedTileset);
     });
 
-    let offset = $derived.by(() => {
+    const calculateOffset = () => {
         let off = 0;
         if (node.n == 3) 
             off = -Math.PI / 6;
@@ -83,15 +96,11 @@
             off = -Math.PI / 2 - Math.PI / 6;
 
         return off;
-    });
-    
-    let scalePolygon = $derived(2 / (2 * Math.sin(Math.PI / node.n)));
-    
-    let transforms = $derived(rotationTrigger >= 0 ? `rotate(${startRotation * 180 / Math.PI}deg) ${node.svgTransform}` : node.svgTransform);
-    let halfways = $derived(rotationTrigger >= 0 ? node.halfways.map(h => new Object({ x: h.x, y: h.y, connections: h.connections, matched: h.matched })) : []);
-    let startRotation = $derived.by(() => {
+    }
+
+    const calculateStartRotation = () => {
         let r = 0;
-        r += offset;
+        r += calculateOffset();
         r += node.angle;
         if (node.mirrored) {
             let mirrorTurns = 0;
@@ -103,20 +112,27 @@
             r += (node.svgTurns * (2 * Math.PI / node.n));
         }
         return r;
-    });
+    }
 
-    let borderStrokeWidth = $derived.by(() => {
-        if (celebrationStage >= 0) return 0;
+    $effect(() => {
+        if (celebrationStage >= 0) {
+            borderStrokeWidth = 0;
+            effectStrokeWidth = 0;
+        }
+    })
 
-        return 2 / scalePolygon;
-    });
+    $effect(() => {
+        if (trigger >= 0) {
+            transforms = `rotate(${startRotation * 180 / Math.PI}deg) ${node.svgTransform}`;
+            halfways = node.halfways.map(h => new Object({ x: h.x, y: h.y, connections: h.connections, matched: h.matched }));
+        }
+    })
 
-    let lineStrokeWidth = $derived(32 / scalePolygon);
+    let stop1Color = $derived.by(() => {
+        if (halfways.reduce((acc, h) => acc + h.connections, 0) != 1) return '#000000';
+        if (!halfways.filter(h => h.connections == 1)[0].matched) return '#000000';
 
-    let effectStrokeWidth = $derived.by(() => {
-        if (celebrationStage >= 0 || node.effects.length == 0) return 0;
-
-        return 4;
+        return $themes['default'].colors[$currentGameSession.gameMode];
     });
 </script>
 
@@ -127,12 +143,10 @@
         top: {node.screenPosition.y}px; 
         transform: translate(-50%, -50%) {transforms};
         --border-stroke-width: {borderStrokeWidth}px;
-        --border-stroke-color: #888;
-        --line-stroke-color: #fff;
         --line-stroke-width: {lineStrokeWidth}px;
         --effect-border-stroke-width: {effectStrokeWidth}px;
-        --effect-border-stroke-color: {node.effects.length > 0 ? node.effects[0].color : '#aaa'};
-        --gradient-stop-1-color: {halfways.reduce((acc, h) => acc + h.connections, 0) == 1 && halfways.filter(h => h.connections == 1)[0].matched ? $themes['default'].colors[$currentGameSession.gameMode] : '#000000'};
+        --effect-border-stroke-color: {node.effects.length > 0 ? $themes['default'].colors[$currentGameSession.gameMode] : '#aaa'};
+        --gradient-stop-1-color: {stop1Color};
         z-index: {node.effects.length > 0 ? 10 : 0};
     "
 >
@@ -167,27 +181,16 @@
 {/each} -->
 
 <style>
-    .tile-button {
-        background: transparent !important;
-    }
-    
     .tile-button :global(#base-polygon) {
         fill: transparent !important;
-        stroke: var(--border-stroke-color);
+        stroke: #888;
         stroke-width: var(--border-stroke-width);
-    }
-    
-    .tile-button :global(polygon),
-    .tile-button :global(rect:not([mask*="pathMask"])),
-    .tile-button :global(circle),
-    .tile-button :global(ellipse) {
-        fill: transparent !important;
     }
     
     .tile-button :global(path:not(#base-polygon):not(#border-polygon)),
     .tile-button :global(line),
     .tile-button :global(circle) {
-        stroke: var(--line-stroke-color) !important;
+        stroke: #fff !important;
         stroke-width: var(--line-stroke-width) !important;
         fill: none !important;
         opacity: 1 !important;
@@ -208,9 +211,5 @@
 
     .tile-button :global(#gradientStop2) {
         offset: 90% !important;
-    }
-
-    .tile-button :global(svg) {
-        background: transparent !important;
     }
 </style>

@@ -141,7 +141,18 @@ export class Polygon {
         this.turns += turns;
         this.rotation = this.turns * 2 * Math.PI / this.n;
         let sign = this.mirrored ? -1 : 1;
-        this.svgTransform += `rotate(${sign * turns * 360 / this.n}deg) `;
+
+        let transformations = this.svgTransform.trim().split(' ');
+        if (transformations.length > 0 && transformations[transformations.length - 1].includes('rotate')) {
+            let totalAngle = 0;
+            totalAngle += parseFloat(transformations[transformations.length - 1].split('(')[1].split('deg)')[0]);
+            totalAngle += sign * turns * 360 / this.n;
+            this.svgTransform = this.svgTransform.replace(transformations[transformations.length - 1], `rotate(${totalAngle}deg) `);
+        } else {
+            this.svgTransform += `rotate(${sign * turns * 360 / this.n}deg) `;
+        }
+
+        // this.svgTransform += `rotate(${sign * turns * 360 / this.n}deg) `;
 
         this.calculateVertices();
         this.calculateHalfways();
@@ -152,8 +163,14 @@ export class Polygon {
         for (let i = 0; i < this.halfways.length; i++) {
             this.halfways[i].connections = connections[i];
         }
+
+        let transformations = this.svgTransform.trim().split(' ');
+        if (transformations.length > 0 && transformations[transformations.length - 1].includes('scaleX')) {
+            this.svgTransform = this.svgTransform.replace(transformations[transformations.length - 1], ``);
+        } else {
+            this.svgTransform += `scaleX(-1) `;
+        }
         
-        this.svgTransform += `scaleX(-1) `;
         this.mirrored = !this.mirrored;
     }
 }

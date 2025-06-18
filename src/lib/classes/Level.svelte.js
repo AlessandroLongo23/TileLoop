@@ -8,6 +8,9 @@ import { tilingRules } from '$lib/stores/tilingRules.js';
 
 export class Level {
     constructor(rule, transformSteps, width, height) {
+        // Generate unique ID for this level instance
+        this.id = `level-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
         this.tilingGenerator = new TilingGenerator();
         this.size = new Vector(width, height);
         scale.subscribe(v => this.scale = v);

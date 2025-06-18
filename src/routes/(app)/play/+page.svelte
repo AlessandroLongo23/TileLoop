@@ -297,15 +297,17 @@
     />
     
     <div class="absolute top-0 right-0 bottom-0 left-0 transition-all duration-300 z-0 bg-zinc-900 overflow-hidden">
-        <LevelRenderer 
-            width={width}
-            height={height}
-            level={level}
-            onTileClick={tileClick}
-            renderTrigger={renderTrigger}
-            showCelebration={showCelebration}
-            celebrationStage={celebrationStage}
-        />
+        {#key level?.id}
+            <LevelRenderer 
+                width={width}
+                height={height}
+                level={level}
+                onTileClick={tileClick}
+                renderTrigger={renderTrigger}
+                showCelebration={showCelebration}
+                celebrationStage={celebrationStage}
+            />
+        {/key}
 
         {#if showCelebration}
             <WinModal

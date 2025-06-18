@@ -81,12 +81,14 @@
         class="absolute top-0 right-0 bottom-0 transition-all duration-300 z-0 bg-zinc-900 overflow-hidden"
         style="left: {isSidebarOpen ? sidebarWidth : 0}px;"
     >
-        <LevelRenderer 
-            width={renderWidth}
-            height={renderHeight}
-            level={level}
-            onTileClick={tileClick}
-            renderTrigger={renderTrigger}
-        />
+        {#key level?.id}
+            <LevelRenderer 
+                width={renderWidth}
+                height={renderHeight}
+                level={level}
+                onTileClick={tileClick}
+                renderTrigger={renderTrigger}
+            />
+        {/key}
     </div>
 </div>

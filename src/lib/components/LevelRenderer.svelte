@@ -88,10 +88,10 @@
     style="width: {width}px; height: {height}px;"
     onclick={handleContainerClick}
 >
-    {#each level.tiling.nodes as node}
+    {#each level.tiling.nodes as node (node.id)}
         <Tile 
             node={node}
-            rotationTrigger={renderTrigger}
+            trigger={renderTrigger}
             celebrationStage={showCelebration ? celebrationStage : -1}
         />
     {/each}
