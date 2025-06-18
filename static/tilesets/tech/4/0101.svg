@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="s-BgHh72J5KvB0" viewBox="0 0 600 600" width="600" height="600">
+    <defs class="s-BgHh72J5KvB0">
+        <clipPath id="polygon-clip-4" class="s-BgHh72J5KvB0">
+            <polygon class="s-BgHh72J5KvB0" points="512.1320343559643,87.86796564403573 512.1320343559643,512.1320343559643 87.86796564403576,512.1320343559643 87.86796564403569,87.86796564403576"/>
+        </clipPath>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="16" result="smallBlur"/>
+            <feGaussianBlur stdDeviation="32" result="mediumBlur"/>
+            <feGaussianBlur stdDeviation="64" result="largeBlur"/>
+            <feMerge>
+                <feMergeNode in="largeBlur"/>
+                <feMergeNode in="mediumBlur"/>
+                <feMergeNode in="smallBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <radialGradient id="redGradient" cx="50%" cy="50%" r="100%">
+            <stop id="gradientStop1" offset="7%" style="stop-color:#1e293b;stop-opacity:1"/>
+            <stop id="gradientStop2" offset="20%" style="stop-color:#1e293b;stop-opacity:1"/>
+        </radialGradient>
+        <mask id="pathMask">
+            <rect width="100%" height="100%" fill="black"/>
+            <line stroke="white" stroke-width="2" fill="none" stroke-linecap="round" class="s-BgHh72J5KvB0" x1="300" y1="87.86796564403576" x2="300" y2="512.1320343559642"/>
+        </mask>
+    </defs>
+    <polygon fill="white" id="base-polygon" stroke="none" class="s-BgHh72J5KvB0" points="512.1320343559643,87.86796564403573 512.1320343559643,512.1320343559643 87.86796564403576,512.1320343559643 87.86796564403569,87.86796564403576"/>
+    <g clip-path="url(#polygon-clip-4)" class="s-BgHh72J5KvB0">
+        <polygon id="border-polygon" fill="none" stroke="#ff0000" stroke-width="0" filter="url(#glow)" class="s-BgHh72J5KvB0" points="512.1320343559643,87.86796564403573 512.1320343559643,512.1320343559643 87.86796564403576,512.1320343559643 87.86796564403569,87.86796564403576"/>
+    </g>
+    <g clip-path="url(#polygon-clip-4)" class="s-BgHh72J5KvB0">
+        <rect width="100%" height="100%" fill="url(#redGradient)" mask="url(#pathMask)" class="s-BgHh72J5KvB0"/>
+    </g>
+</svg>

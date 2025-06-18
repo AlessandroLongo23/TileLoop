@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="s-BgHh72J5KvB0" viewBox="0 0 600 600" width="600" height="600">
+    <defs class="s-BgHh72J5KvB0">
+        <clipPath id="polygon-clip-3" class="s-BgHh72J5KvB0">
+            <polygon class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+        </clipPath>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="16" result="smallBlur"/>
+            <feGaussianBlur stdDeviation="32" result="mediumBlur"/>
+            <feGaussianBlur stdDeviation="64" result="largeBlur"/>
+            <feMerge>
+                <feMergeNode in="largeBlur"/>
+                <feMergeNode in="mediumBlur"/>
+                <feMergeNode in="smallBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <radialGradient id="redGradient" cx="50%" cy="50%" r="100%">
+            <stop id="gradientStop1" offset="7%" style="stop-color:#1e293b;stop-opacity:1"/>
+            <stop id="gradientStop2" offset="20%" style="stop-color:#1e293b;stop-opacity:1"/>
+        </radialGradient>
+        <mask id="pathMask">
+            <rect width="100%" height="100%" fill="black"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 300 450 L 300.2776883197845 428.4805332313986 L 301.0067122958264 407.9191645451378 L 302.0310104531581 388.27058753746974 L 303.194521316812 369.48949580464625 L 304.3411834118205 351.5305829429195 L 305.31493526321606 334.3485425485415 L 305.95971539603113 317.8980682177642 L 306.1194623352981 302.13385354683965 L 305.6381146060495 287.01059213202 L 304.35961073331765 272.4829775695571 L 302.127889242135 258.50570345570304 L 298.786888657534 245.03346338670997 L 294.180547504547 232.02095095882976 L 288.1528043082066 219.4228597683145 L 280.54759759354505 207.19388341141612 L 271.20886588559483 195.2887154843868 L 259.9805477093885 183.66204958347848 L 246.7065815899582 172.26857930494327 L 231.2309060523367 161.0629982450332 L 213.39745962155615 150.00000000000006"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 300 450 L 299.40876014223215 434.71754216840293 L 297.66835154911286 421.08502363317933 L 294.8287406909188 408.9639888595235 L 290.9398940379263 398.2159823126287 L 286.05177806041195 388.7025484576891 L 280.2143592286523 380.28523175989835 L 273.4776040129239 372.8255766844503 L 265.8914788835032 366.18512769653887 L 257.50595031066683 360.22542926135776 L 248.3709847646912 354.8080258441008 L 238.53654871585286 349.79446190996185 L 228.05260863442837 345.04628192413475 L 216.9691309906942 340.42503035181323 L 205.3360822549269 335.79225165819105 L 193.20342889740294 331.0094903084622 L 180.62113738839892 325.9382907678204 L 167.63917419819134 320.4401975014594 L 154.3075057970567 314.37675497457315 L 140.6760986552716 307.6095076523555 L 126.79491924311233 300"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 473.2050807568878 300.00000000000006 A 86.60254037844389 86.60254037844389 0 0 1 386.6025403784439 150.00000000000003"/>
+        </mask>
+    </defs>
+    <polygon fill="white" id="base-polygon" stroke="none" class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+    <g clip-path="url(#polygon-clip-3)" class="s-BgHh72J5KvB0">
+        <polygon id="border-polygon" fill="none" stroke="#ff0000" stroke-width="0" filter="url(#glow)" class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+    </g>
+    <g clip-path="url(#polygon-clip-3)" class="s-BgHh72J5KvB0">
+        <rect width="100%" height="100%" fill="url(#redGradient)" mask="url(#pathMask)" class="s-BgHh72J5KvB0"/>
+    </g>
+</svg>

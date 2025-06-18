@@ -33,5 +33,4 @@ ios/App/capacitor.config.json
 
 package-lock.json
 
-static/tilesets/
 static/tilings/

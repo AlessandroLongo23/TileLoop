@@ -29,8 +29,7 @@
 
 ## Tileset
 
-- [ ] add variations
-- [ ] add standard tilesets
+- [ ] add support for multiple variants in the same style for a specific tile 
 
 ## Level generation
 
