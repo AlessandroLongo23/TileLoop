@@ -152,8 +152,6 @@ export class Polygon {
             this.svgTransform += `rotate(${sign * turns * 360 / this.n}deg) `;
         }
 
-        // this.svgTransform += `rotate(${sign * turns * 360 / this.n}deg) `;
-
         this.calculateVertices();
         this.calculateHalfways();
     }

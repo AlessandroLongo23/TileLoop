@@ -22,8 +22,9 @@ export class Level {
         this.removeOverflowingTiles();
         this.generateConnections();
         this.convertTilingToTiles();
-        this.checkIfSolved();
         this.addEffects();
+        this.shuffle();
+        this.checkIfSolved();
 
         this.isFrozen = false;
     }
@@ -49,13 +50,14 @@ export class Level {
         let uniqueHalfways = [];
         for (const node of this.tiling.nodes) {
             for (const halfway of node.halfways) {
-                if (!uniqueHalfways.some(h => isWithinTolerance(h.a, halfway))) {
+                const existing = uniqueHalfways.find(h => isWithinTolerance(h.a, halfway));
+                if (!existing) {
                     uniqueHalfways.push({
                         a: halfway,
                         b: null
                     });
                 } else {
-                    uniqueHalfways.find(h => isWithinTolerance(h.a, halfway)).b = halfway;
+                    existing.b = halfway;
                 }
             }
         }
@@ -77,24 +79,19 @@ export class Level {
             return [];
         }
 
-        const generatedTiles = [];
-        for (let i = this.tiling.nodes.length - 1; i >= 0; i--) {
-            const node = this.tiling.nodes[i];
-
+        for (let node of this.tiling.nodes) {
             const [tileType, mirrored, turns, simmetries] = this.getTileType(node);
-            
-            node.id = `tile-${i}-${node.centroid.x.toFixed(3)}-${node.centroid.y.toFixed(3)}`;
             
             node.tileType = tileType;
             if (mirrored) node.mirror();
             node.isRotating = false;
             node.svgTurns = turns;
             node.simmetries = simmetries;
- 
+            
             node.effects = [];
-        }
 
-        this.shuffle();
+            node.id = `tile-${node.centroid.x.toFixed(3)}-${node.centroid.y.toFixed(3)}`;
+        }
     }
 
     getTileType = (node) => {

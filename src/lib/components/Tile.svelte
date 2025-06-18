@@ -21,7 +21,7 @@
     let borderStrokeWidth = $state(0);
     let effectStrokeWidth = $state(0);
         
-    let transforms = $state(node.svgTransform);
+    let transforms = $state('');
     let halfways = $state([]);
 
     onMount(() => {
@@ -52,7 +52,8 @@
         isLoading = true;
         
         try {
-            const svgPath = `/tilesets/${tileset}/${type}.svg`;
+            const [sides, connections] = type.split('/');
+            const svgPath = `/tilesets/${tileset}/${sides}/${connections}.svg`;
             const response = await fetch(svgPath);
             
             if (response.ok) {
@@ -106,9 +107,9 @@
         r += node.angle;
         if (node.mirrored) {
             let mirrorTurns = 0;
-            if (node.n == 3) mirrorTurns = 0;
-            else if (node.n == 4) mirrorTurns = 0;
-            else if (node.n == 6) mirrorTurns = 0;
+            if (node.n == 3) mirrorTurns = 2;
+            else if (node.n == 4) mirrorTurns = 1;
+            else if (node.n == 6) mirrorTurns = 1;
             r -= ((node.svgTurns - mirrorTurns) * (2 * Math.PI / node.n));
         } else {
             r += (node.svgTurns * (2 * Math.PI / node.n));
