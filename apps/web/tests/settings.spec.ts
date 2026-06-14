@@ -18,10 +18,22 @@ test('sound-effects setting persists across reload', async ({ page }) => {
   await expect(page.getByRole('checkbox', { name: 'Sound Effects' })).not.toBeChecked();
 });
 
-test('appearance modal lets you switch a tileset', async ({ page }) => {
+test('appearance modal switches a tileset and it persists', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__tileloop = { seed: 12345 };
+  });
   await page.goto('/menu');
-  // Appearance button only shows with a gameMode; open via a play/campaign header later.
-  // On the menu, the settings button is always present.
-  await page.getByRole('button', { name: 'Settings' }).click();
-  await expect(page.getByTestId('settings-modal')).toBeVisible();
+  await page.getByTestId('mode-precision').click(); // in-game header has the appearance button
+
+  await page.getByRole('button', { name: 'Appearance' }).click();
+  await expect(page.getByTestId('appearance-modal')).toBeVisible();
+
+  const tech = page.getByTestId('tileset-square-tech');
+  await tech.click();
+  await expect(tech).toHaveClass(/bg-slate-600/);
+
+  // Reload and confirm the tech tileset is still selected.
+  await page.reload();
+  await page.getByRole('button', { name: 'Appearance' }).click();
+  await expect(page.getByTestId('tileset-square-tech')).toHaveClass(/bg-slate-600/);
 });
