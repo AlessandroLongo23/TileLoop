@@ -26,7 +26,7 @@ const fetchTileSvg: LoadTileSvg = async (tileset, sides, connections) => {
 
 declare global {
   interface Window {
-    __tileloop?: { seed?: number };
+    __tileloop?: { seed?: number; solve?: () => void };
   }
 }
 
