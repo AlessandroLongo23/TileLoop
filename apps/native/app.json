@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "TileLoop",
+    "slug": "tileloop",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "tileloop",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tileloop.app"
+    },
+    "android": {
+      "package": "com.tileloop.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#18181b"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
