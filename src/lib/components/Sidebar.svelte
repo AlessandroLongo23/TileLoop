@@ -346,15 +346,6 @@
 												<ls.ChevronsUpDown size={14} />
 											</button>
 										{/if}
-
-										<button
-											class="p-1 rounded-md hover:bg-zinc-700/70 transition-all text-white/80 hover:text-white/100"
-											onclick={openTilingModal}
-											aria-label="View all tilings"
-											title="View all tilings"
-										>
-											<ls.Maximize2 size={14} />
-										</button>
 									</div>
 								</div>
 								

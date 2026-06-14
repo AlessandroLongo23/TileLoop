@@ -3,6 +3,7 @@ import { computeIntersection } from '$lib/utils/geometry.svelte';
 import { isWithinTolerance } from '$lib/utils/math.svelte';
 import { scale } from '$lib/stores/configuration.js';
 import { Vector } from '$lib/classes/Vector.svelte';
+import { get } from 'svelte/store';
 
 import { tilingRules } from '$lib/stores/tilingRules.js';
 
@@ -13,7 +14,7 @@ export class Level {
         
         this.tilingGenerator = new TilingGenerator();
         this.size = new Vector(width, height);
-        scale.subscribe(v => this.scale = v);
+        this.scale = get(scale);
 
         rule = rule || tilingRules.map(group => group.rules).flat().pickRandom().rulestring;
         transformSteps = transformSteps || [1, 2, 3].pickRandom([0.5, 0.4, 0.1]);
@@ -83,7 +84,7 @@ export class Level {
             const [tileType, mirrored, turns, simmetries] = this.getTileType(node);
             
             node.tileType = tileType;
-            if (mirrored) node.mirror();
+            if (mirrored) node.mirror(false); // visual-only mirror; do not corrupt connection data
             node.isRotating = false;
             node.svgTurns = turns;
             node.simmetries = simmetries;

@@ -156,10 +156,18 @@ export class Polygon {
         this.calculateHalfways();
     }
 
-    mirror() {
-        let connections = this.halfways.map(h => h.connections).simmetrize(1);
-        for (let i = 0; i < this.halfways.length; i++) {
-            this.halfways[i].connections = connections[i];
+    mirror(reflectConnections = true) {
+        // `reflectConnections` performs a true data-level mirror of the tile.
+        // During canonicalization (Level.convertTilingToTiles) we only want the
+        // VISUAL mirror (scaleX + mirrored flag): reflecting the connection data
+        // there reassigns connection values across edges WITHOUT moving their
+        // positions, so values end up on the wrong physical edge and
+        // checkIfSolved() (which matches by position) can never detect a solve.
+        if (reflectConnections) {
+            let connections = this.halfways.map(h => h.connections).simmetrize(1);
+            for (let i = 0; i < this.halfways.length; i++) {
+                this.halfways[i].connections = connections[i];
+            }
         }
 
         let transformations = this.svgTransform.trim().split(' ');

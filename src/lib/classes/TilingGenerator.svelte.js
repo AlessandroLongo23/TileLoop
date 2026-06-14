@@ -1,4 +1,4 @@
-import { tolerance, transformSteps, offsets, possibleSides, possibleAngles } from '$lib/stores/configuration.js';
+import { tolerance, transformSteps, offsets, possibleSides, possibleAngles, parameter } from '$lib/stores/configuration.js';
 import { RegularPolygon, IsotoxalPolygon, StarPolygon, DualPolygon } from '$lib/classes/Polygon.svelte';
 import { sortPointsByAngleAndDistance, getClockwiseAngle } from '$lib/utils/geometry.svelte';
 import { apothem, angleBetween } from '$lib/utils/geometry.svelte';
@@ -270,13 +270,12 @@ export class TilingGenerator {
                 if (this.shapeSeed[i][j].includes('(')) {
                     let n = this.shapeSeed[i][j].split('(')[0];
                     let alfa = this.shapeSeed[i][j].split('(')[1].split(')')[0];
-                    parameter.subscribe((v) => {
-                        this.shapeSeed[i][j] = {
-                            type: 'isotoxal',
-                            n: parseInt(n),
-                            alfa: alfa == 'a' ? v * Math.PI / 180 : parseInt(alfa) * Math.PI / 180
-                        };
-                    });
+                    const v = get(parameter);
+                    this.shapeSeed[i][j] = {
+                        type: 'isotoxal',
+                        n: parseInt(n),
+                        alfa: alfa == 'a' ? v * Math.PI / 180 : parseInt(alfa) * Math.PI / 180
+                    };
                 } else if (this.shapeSeed[i][j].includes('{')) {
                     let a = this.shapeSeed[i][j].split('{')[1].split('}')[0];
                     let n = a.split('.')[0];
