@@ -1,38 +1,62 @@
-# sv
+# TileLoop
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+An Infinity-Loop-style tiling puzzle: rotate regular-polygon tiles until every
+edge connection matches its neighbour. Migrated from Svelte/SvelteKit/Capacitor
+to a TypeScript monorepo with a shared core, a React web app, and a React Native
+(Expo) app.
 
-## Creating a project
+## Layout
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npx sv create
-
-# create a new project in my-app
-npx sv create my-app
+```
+packages/
+  core/        @tileloop/core — framework-agnostic TypeScript: geometry, the
+               tiling engine, Zustand state, static data, SVG prep, audio defs.
+               Platform bits (rng, clock, storage, asset loading) are injected.
+apps/
+  web/         React + Vite + Motion (framer-motion) + Tailwind 4. Playwright
+               e2e. Deploys to Vercel. Includes the level + tile editors.
+  native/      Expo + Expo Router + react-native-svg + Moti + NativeWind.
+               Shares @tileloop/core; AsyncStorage persistence.
 ```
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Develop
 
 ```bash
-npm run dev
+npm install
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+npm run dev -w web            # web game at http://localhost:5173
+npm run start -w native       # Expo (choose a target)
 ```
 
-## Building
-
-To create a production version of your app:
+## Verify
 
 ```bash
-npm run build
+npm run typecheck             # turbo: all packages
+npm run test                  # turbo: core (vitest) + web (playwright)
+
+npm run build -w web          # web production build
+npm run export:web -w native  # native web bundle (validates metro/nativewind)
+npm run doctor -w native      # expo-doctor
 ```
 
-You can preview the production build with `npm run preview`.
+The engine is deterministic under an injected seed (`window.__tileloop.seed` on
+web), which is what makes the Playwright suite stable.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Architecture notes
+
+- **One shared core, two UI layers.** React-DOM and React-Native can't share
+  components, so each app owns its UI over identical logic + state in `core`.
+- **State** is Zustand (vanilla stores in `core`, `useStore` hooks in the apps),
+  persisted via `persist` over an injected storage adapter (localStorage /
+  AsyncStorage).
+- **Tiles** are SVGs from `apps/web/public/tilesets`; web injects them with
+  `dangerouslySetInnerHTML` + CSS, native bakes styling into the string and
+  renders with `react-native-svg` (no CSS cascade) — both via `prepareTileSvg`.
+- **Animation** is Motion on web and Moti (Reanimated) on native.
+
+See `docs/superpowers/` for the design spec and implementation plan.
+
+## Deploy
+
+`vercel.json` builds the web app (`npm run build -w web` → `apps/web/dist`) as a
+static SPA. Native builds use EAS / `expo run:*` (see `apps/native/README.md`).
