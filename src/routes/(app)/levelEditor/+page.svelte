@@ -89,7 +89,7 @@
             const [tileType, mirrored, turns, simmetries] = level.getTileType(node);
             node.tileType = tileType;
             
-            if (mirrored) node.mirror(false); // visual-only mirror; do not corrupt connection data
+            if (mirrored !== node.mirrored) node.mirror(false); // idempotent: only flip when canonical mirror state changed
             
             node.svgTurns = turns;
             node.simmetries = simmetries;
@@ -109,7 +109,7 @@
         for (const node of level.tiling.nodes) {
             const [tileType, mirrored, turns, simmetries] = level.getTileType(node);
             node.tileType = tileType;
-            if (mirrored) node.mirror(false); // visual-only mirror; do not corrupt connection data
+            if (mirrored !== node.mirrored) node.mirror(false); // idempotent: only flip when canonical mirror state changed
             node.svgTurns = turns;
             node.simmetries = simmetries;
         }
