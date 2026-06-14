@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="s-BgHh72J5KvB0" viewBox="0 0 600 600" width="600" height="600">
+    <defs class="s-BgHh72J5KvB0">
+        <clipPath id="polygon-clip-3" class="s-BgHh72J5KvB0">
+            <polygon class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+        </clipPath>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="16" result="smallBlur"/>
+            <feGaussianBlur stdDeviation="32" result="mediumBlur"/>
+            <feGaussianBlur stdDeviation="64" result="largeBlur"/>
+            <feMerge>
+                <feMergeNode in="largeBlur"/>
+                <feMergeNode in="mediumBlur"/>
+                <feMergeNode in="smallBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <radialGradient id="redGradient" cx="50%" cy="50%" r="100%">
+            <stop id="gradientStop1" offset="7%" style="stop-color:#1e293b;stop-opacity:1"/>
+            <stop id="gradientStop2" offset="20%" style="stop-color:#1e293b;stop-opacity:1"/>
+        </radialGradient>
+        <mask id="pathMask">
+            <rect width="100%" height="100%" fill="black"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 170.09618943233423 225.00000000000006 L 183.6268060756457 232.12920017924174 L 196.30311774127108 237.43822139224744 L 208.22004720450883 241.03956363901722 L 219.47251724065734 243.04572691955096 L 230.15545062501516 243.56921123384882 L 240.3637701328807 242.72251658191067 L 250.19239853955236 240.61814296373652 L 259.7362586203287 237.36859037932643 L 269.0902731505081 233.0863588286804 L 278.34936490538905 227.8839483117984 L 287.60845666027006 221.8738588286804 L 296.9624711904494 215.16859037932647 L 306.50633127122575 207.88064296373653 L 316.3349596778974 200.12251658191065 L 326.54327918576297 192.00671123384876 L 337.22621257012077 183.64572691955095 L 348.4786826062694 175.1520636390172 L 360.3956120695071 166.63822139224743 L 373.0719237351323 158.21670017924174 L 386.6025403784439 150.00000000000003"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 170.09618943233423 225.00000000000006 L 188.5937501699458 236.00021852356838 L 206.03590580080453 246.912256149919 L 222.53992355899413 257.62361287905185 L 238.22307067859822 268.02178871096703 L 253.2026143937004 277.99428364566444 L 267.59582193838446 287.4285976831442 L 281.51996054673384 296.2122308234062 L 295.09229745283227 304.2326830664505 L 308.4300998907635 311.3774544122771 L 321.65063509461106 317.534044860886 L 334.8711702984586 322.5899544122771 L 348.2089727363897 326.4326830664505 L 361.78130964248817 328.9497308234062 L 375.70544825083755 330.0285976831442 L 390.0986557955216 329.5567836456645 L 405.07819951062385 327.421788710967 L 420.761346630228 323.5111128790519 L 437.2653643884175 317.71225614991897 L 454.7075200192761 309.91271852356834 L 473.2050807568878 300.00000000000006"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 300 450 A 259.8076211353315 259.8076211353315 0 0 0 170.09618943233423 225.00000000000006"/>
+        </mask>
+    </defs>
+    <polygon fill="white" id="base-polygon" stroke="none" class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+    <g clip-path="url(#polygon-clip-3)" class="s-BgHh72J5KvB0">
+        <polygon id="border-polygon" fill="none" stroke="#ff0000" stroke-width="0" filter="url(#glow)" class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+    </g>
+    <g clip-path="url(#polygon-clip-3)" class="s-BgHh72J5KvB0">
+        <rect width="100%" height="100%" fill="url(#redGradient)" mask="url(#pathMask)" class="s-BgHh72J5KvB0"/>
+    </g>
+</svg>

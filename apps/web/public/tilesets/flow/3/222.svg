@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="s-BgHh72J5KvB0" viewBox="0 0 600 600" width="600" height="600">
+    <defs class="s-BgHh72J5KvB0">
+        <clipPath id="polygon-clip-3" class="s-BgHh72J5KvB0">
+            <polygon class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+        </clipPath>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="16" result="smallBlur"/>
+            <feGaussianBlur stdDeviation="32" result="mediumBlur"/>
+            <feGaussianBlur stdDeviation="64" result="largeBlur"/>
+            <feMerge>
+                <feMergeNode in="largeBlur"/>
+                <feMergeNode in="mediumBlur"/>
+                <feMergeNode in="smallBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <radialGradient id="redGradient" cx="50%" cy="50%" r="100%">
+            <stop id="gradientStop1" offset="7%" style="stop-color:#1e293b;stop-opacity:1"/>
+            <stop id="gradientStop2" offset="20%" style="stop-color:#1e293b;stop-opacity:1"/>
+        </radialGradient>
+        <mask id="pathMask">
+            <rect width="100%" height="100%" fill="black"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 386.60254037844385 450 A 173.2050807568877 173.2050807568877 0 0 1 473.2050807568878 300.00000000000006"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 213.39745962155615 450.00000000000006 L 214.4110341035104 430.3269375000001 L 217.37511430113807 413.44050000000004 L 222.17473534208688 399.0898125000001 L 228.69493235400444 387.02400000000006 L 236.82074046453837 376.99218750000006 L 246.43719480133623 368.7435000000001 L 257.4293304920457 362.0270625000001 L 269.6821826643144 356.59200000000016 L 283.08078644578984 352.1874375000001 L 297.51017696411975 348.56250000000006 L 312.85538934695177 345.4663125 L 329.00145872193326 342.6480000000001 L 345.83342021671217 339.8566875 L 363.236308958936 336.8415000000001 L 381.0951600762523 333.35156250000006 L 399.2950086963087 329.1360000000001 L 417.7208899467529 323.9439375 L 436.25783895523233 317.52450000000005 L 454.79089084939466 309.62681250000014 L 473.2050807568878 300.00000000000006"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 213.39745962155615 150.00000000000006 A 173.2050807568878 173.2050807568878 0 0 0 386.6025403784439 150.00000000000003"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 126.79491924311233 300 L 144.33907837932847 308.95874999999995 L 160.44520233256048 314.835 L 175.2730727898067 317.85375000000005 L 188.98247143806532 318.24000000000007 L 201.73317996433454 316.21875 L 213.68498005561258 312.015 L 224.9976533988978 305.85375 L 235.8309816811883 297.96000000000004 L 246.34474658948236 288.55875 L 256.6987298107781 277.875 L 267.052713032074 266.13375 L 277.5664779403679 253.56000000000003 L 288.39980622265847 240.37875000000003 L 299.7124795659436 226.81500000000005 L 311.6642796572217 213.09375000000003 L 324.41498818349095 199.43999999999997 L 338.12438683174963 186.07875 L 352.9522572889958 173.235 L 369.05838124222765 161.13375000000005 L 386.6025403784439 150.00000000000003"/>
+        </mask>
+    </defs>
+    <polygon fill="white" id="base-polygon" stroke="none" class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+    <g clip-path="url(#polygon-clip-3)" class="s-BgHh72J5KvB0">
+        <polygon id="border-polygon" fill="none" stroke="#ff0000" stroke-width="0" filter="url(#glow)" class="s-BgHh72J5KvB0" points="300,0 559.8076211353316,449.99999999999994 40.192378864668456,450.0000000000001"/>
+    </g>
+    <g clip-path="url(#polygon-clip-3)" class="s-BgHh72J5KvB0">
+        <rect width="100%" height="100%" fill="url(#redGradient)" mask="url(#pathMask)" class="s-BgHh72J5KvB0"/>
+    </g>
+</svg>

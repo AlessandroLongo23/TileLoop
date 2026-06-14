@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="s-BgHh72J5KvB0" viewBox="0 0 600 600" width="600" height="600">
+    <defs class="s-BgHh72J5KvB0">
+        <clipPath id="polygon-clip-4" class="s-BgHh72J5KvB0">
+            <polygon class="s-BgHh72J5KvB0" points="512.1320343559643,87.86796564403573 512.1320343559643,512.1320343559643 87.86796564403576,512.1320343559643 87.86796564403569,87.86796564403576"/>
+        </clipPath>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="16" result="smallBlur"/>
+            <feGaussianBlur stdDeviation="32" result="mediumBlur"/>
+            <feGaussianBlur stdDeviation="64" result="largeBlur"/>
+            <feMerge>
+                <feMergeNode in="largeBlur"/>
+                <feMergeNode in="mediumBlur"/>
+                <feMergeNode in="smallBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+        <radialGradient id="redGradient" cx="50%" cy="50%" r="100%">
+            <stop id="gradientStop1" offset="7%" style="stop-color:#1e293b;stop-opacity:1"/>
+            <stop id="gradientStop2" offset="20%" style="stop-color:#1e293b;stop-opacity:1"/>
+        </radialGradient>
+        <mask id="pathMask">
+            <rect width="100%" height="100%" fill="black"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 370.71067811865476 87.86796564403575 A 212.13203435596427 141.4213562373095 90 0 0 512.1320343559643 300"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 512.1320343559643 300 A 282.842712474619 212.1320343559643 180 0 1 229.28932188134524 87.86796564403575"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 512.1320343559643 300 A 212.13203435596415 141.4213562373095 -90 0 0 370.71067811865476 512.1320343559642"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 512.1320343559643 300 A 282.8427124746191 212.13203435596427 180 0 0 229.2893218813452 512.1320343559643"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 512.1320343559643 300 L 483.1297867935947 300.51265241636025 L 456.5872373765218 301.9798989873223 L 432.231086310824 304.29567369570833 L 409.7880338025792 307.3539105243401 L 388.98478005786546 311.0485434560398 L 369.5480252827613 315.2735064736294 L 351.2044696833444 319.922733559931 L 333.6808134656932 324.8901586977665 L 316.7037568358857 330.0697158699579 L 300 335.3553390593274 L 283.2962431641143 340.64096224869684 L 266.3191865343069 345.8205194208883 L 248.79553031665563 350.7879445587238 L 230.45197471723884 355.43717164502533 L 211.01521994213442 359.66213466261496 L 190.2119661974208 363.35676759431465 L 167.7689136891759 366.4150044229465 L 143.4127626234781 368.73077913133244 L 116.87021320640551 370.1980257022945 L 87.86796564403573 370.71067811865476"/>
+            <path fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="s-BgHh72J5KvB0" d="M 512.1320343559643 300 L 483.1297867935947 299.48734758363975 L 456.5872373765218 298.0201010126776 L 432.231086310824 295.7043263042917 L 409.7880338025792 292.6460894756599 L 388.98478005786546 288.9514565439602 L 369.5480252827613 284.7264935263706 L 351.2044696833444 280.077266440069 L 333.6808134656932 275.1098413022335 L 316.70375683588566 269.930284130042 L 300 264.64466094067257 L 283.2962431641143 259.35903775130316 L 266.3191865343069 254.17948057911167 L 248.79553031665563 249.21205544127614 L 230.4519747172388 244.56282835497458 L 211.01521994213442 240.33786533738498 L 190.2119661974208 236.64323240568527 L 167.76891368917586 233.58499557705346 L 143.41276262347807 231.26922086866753 L 116.8702132064055 229.80197429770547 L 87.86796564403572 229.2893218813452"/>
+        </mask>
+    </defs>
+    <polygon fill="white" id="base-polygon" stroke="none" class="s-BgHh72J5KvB0" points="512.1320343559643,87.86796564403573 512.1320343559643,512.1320343559643 87.86796564403576,512.1320343559643 87.86796564403569,87.86796564403576"/>
+    <g clip-path="url(#polygon-clip-4)" class="s-BgHh72J5KvB0">
+        <polygon id="border-polygon" fill="none" stroke="#ff0000" stroke-width="0" filter="url(#glow)" class="s-BgHh72J5KvB0" points="512.1320343559643,87.86796564403573 512.1320343559643,512.1320343559643 87.86796564403576,512.1320343559643 87.86796564403569,87.86796564403576"/>
+    </g>
+    <g clip-path="url(#polygon-clip-4)" class="s-BgHh72J5KvB0">
+        <rect width="100%" height="100%" fill="url(#redGradient)" mask="url(#pathMask)" class="s-BgHh72J5KvB0"/>
+    </g>
+</svg>

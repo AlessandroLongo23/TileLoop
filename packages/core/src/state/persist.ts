@@ -46,6 +46,21 @@ export function createValueStore<T>(initial: T): StoreApi<ValueStore<T>> {
 interface PersistApi {
   hasHydrated(): boolean;
   onFinishHydration(cb: () => void): () => void;
+  rehydrate(): Promise<void> | void;
+}
+
+/**
+ * Re-read every persisted store from the (now-installed) platform storage.
+ * Needed because stores auto-hydrate at creation time, which can run before the
+ * host app injects its real storage adapter.
+ */
+export function rehydrateStores(stores: StoreApi<unknown>[]): Promise<void> {
+  return Promise.all(
+    stores.map((s) => {
+      const api = (s as unknown as { persist?: PersistApi }).persist;
+      return api ? Promise.resolve(api.rehydrate()) : Promise.resolve();
+    }),
+  ).then(() => undefined);
 }
 
 /** Resolves once every persisted store has finished hydrating from storage. */

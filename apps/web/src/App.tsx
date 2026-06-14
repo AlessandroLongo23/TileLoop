@@ -1,10 +1,23 @@
-import { CORE_VERSION } from '@tileloop/core';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import Splash from './routes/Splash';
+import Menu from './routes/Menu';
+import Campaign from './routes/Campaign';
+import Play from './routes/Play';
+
+const router = createBrowserRouter([
+  {
+    element: <Layout />,
+    children: [
+      { path: '/', element: <Splash /> },
+      { path: '/menu', element: <Menu /> },
+      { path: '/campaign', element: <Campaign /> },
+      { path: '/play', element: <Play /> },
+      { path: '*', element: <Navigate to="/" replace /> },
+    ],
+  },
+]);
 
 export default function App() {
-  return (
-    <div className="flex h-screen w-full items-center justify-center bg-zinc-900 text-zinc-100">
-      <h1 className="text-3xl font-bold">TileLoop</h1>
-      <span className="sr-only">core {CORE_VERSION}</span>
-    </div>
-  );
+  return <RouterProvider router={router} />;
 }
