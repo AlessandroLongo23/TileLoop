@@ -15,9 +15,14 @@ test('menu shows all game modes', async ({ page }) => {
   await expect(page.getByText('Connect the loops')).toBeVisible();
 });
 
-test('campaign button navigates to the campaign screen', async ({ page }) => {
+test('campaign screen shows a level grid and the first level is unlocked', async ({ page }) => {
   await page.goto('/menu');
   await page.getByTestId('mode-campaign').click();
   await expect(page).toHaveURL(/\/campaign$/);
-  await expect(page.getByTestId('campaign-heading')).toBeVisible();
+  await expect(page.getByTestId('level-grid')).toBeVisible();
+
+  // Level 1 is unlocked and starts a game.
+  await page.getByTestId('level-1').click();
+  await expect(page).toHaveURL(/\/play$/);
+  await expect(page.getByTestId('level-renderer')).toBeVisible();
 });
