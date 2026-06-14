@@ -122,12 +122,20 @@ export default function Menu() {
 
         {show && (
           <motion.div
-            className="mt-20 text-sm font-light tracking-wide text-slate-500"
+            className="mt-20 flex flex-col items-center gap-3 text-sm font-light tracking-wide text-slate-500"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            Connect the loops
+            <span>Connect the loops</span>
+            <div className="flex gap-4 text-xs text-slate-600">
+              <button onClick={() => navigate('/editor/level')} className="hover:text-slate-400">
+                Level Editor
+              </button>
+              <button onClick={() => navigate('/editor/tile')} className="hover:text-slate-400">
+                Tile Editor
+              </button>
+            </div>
           </motion.div>
         )}
       </main>

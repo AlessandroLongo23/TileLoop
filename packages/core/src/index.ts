@@ -20,6 +20,7 @@ export * from './tiling/Polygon';
 export * from './tiling/Tiling';
 export * from './tiling/TilingGenerator';
 export * from './tiling/Level';
+export * from './tiling/levelLoader';
 
 // State
 export * from './state/configStore';

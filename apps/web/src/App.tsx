@@ -4,6 +4,8 @@ import Splash from './routes/Splash';
 import Menu from './routes/Menu';
 import Campaign from './routes/Campaign';
 import Play from './routes/Play';
+import LevelEditor from './routes/LevelEditor';
+import TileEditor from './routes/TileEditor';
 
 const router = createBrowserRouter([
   {
@@ -13,6 +15,8 @@ const router = createBrowserRouter([
       { path: '/menu', element: <Menu /> },
       { path: '/campaign', element: <Campaign /> },
       { path: '/play', element: <Play /> },
+      { path: '/editor/level', element: <LevelEditor /> },
+      { path: '/editor/tile', element: <TileEditor /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
