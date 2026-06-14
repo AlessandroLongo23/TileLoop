@@ -1,12 +1,35 @@
-node_modules
+# Dependencies
+node_modules/
 
-# Output
-.output
+# Build outputs
+dist/
+build/
+.output/
+.turbo/
+.svelte-kit/
+*.tsbuildinfo
+
+# Vite / web
+apps/web/dist/
+vite.config.*.timestamp-*
+
+# Expo / native
+.expo/
+apps/native/.expo/
+apps/native/android/
+apps/native/ios/
+apps/native/assets/tilesets.gen.ts
+
+# Testing
+playwright-report/
+test-results/
+coverage/
+.vitest/
+
+# Deploy
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
-/build
 
 # OS
 .DS_Store
@@ -18,19 +41,7 @@ Thumbs.db
 !.env.example
 !.env.test
 
-# Vite
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
-
-# Mobile/Capacitor
-android/app/src/main/assets/public
-android/app/src/main/assets/capacitor.config.json
+# Legacy Capacitor android build artifacts
 android/.gradle
 android/build
 android/app/build
-ios/App/public
-ios/App/capacitor.config.json
-
-package-lock.json
-
-static/tilings/
