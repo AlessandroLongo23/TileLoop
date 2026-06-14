@@ -52,6 +52,10 @@ export class Polygon {
   id?: string;
   screenPosition?: Vector;
 
+  // Attached by TilingGenerator.calculateNeighbors.
+  directNeighbors?: Polygon[];
+  dualNeighbors?: Polygon[];
+
   constructor(data: PolygonData) {
     this.centroid = data.centroid;
     this.n = data.n;
