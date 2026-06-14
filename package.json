@@ -19,5 +19,8 @@
     "turbo": "^2.5.0",
     "typescript": "^5.6.0",
     "@types/node": "^22.0.0"
+  },
+  "overrides": {
+    "vite": "^6.0.0"
   }
 }
