@@ -10,6 +10,9 @@
     "web": "expo start --web",
     "export:web": "expo export -p web",
     "prebuild:tilesets": "node scripts/gen-tilesets.mjs",
+    "prestart": "node scripts/gen-tilesets.mjs",
+    "preexport:web": "node scripts/gen-tilesets.mjs",
+    "pretypecheck": "node scripts/gen-tilesets.mjs",
     "typecheck": "tsc --noEmit",
     "doctor": "npx expo-doctor"
   },

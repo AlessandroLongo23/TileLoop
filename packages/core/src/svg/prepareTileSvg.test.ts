@@ -46,6 +46,44 @@ describe('prepareTileSvg', () => {
   });
 });
 
+const REALISTIC = `<svg viewBox="0 0 600 600" width="600" height="600">
+  <radialGradient id="redGradient">
+    <stop id="gradientStop1" offset="7%" style="stop-color:#1e293b;stop-opacity:1"/>
+    <stop id="gradientStop2" offset="20%" style="stop-color:#1e293b;stop-opacity:1"/>
+  </radialGradient>
+  <mask id="pathMask"><path fill="none" stroke="white" stroke-width="2" d="M0 0"/></mask>
+  <polygon fill="white" id="base-polygon" stroke="none" points="0,0"/>
+  <rect fill="url(#redGradient)" mask="url(#pathMask)"/>
+</svg>`;
+
+describe('prepareTileSvg inline (native)', () => {
+  it('bakes base transparency, line width, and loop colour into the markup', () => {
+    const out = prepareTileSvg(REALISTIC, {
+      tileset: 'loop',
+      nodeId: 'n1',
+      scale: 60,
+      scalePolygon: 1.4142,
+      inline: { borderStrokeWidth: 1.4, lineStrokeWidth: 22.6, stop1Color: '#000000' },
+    });
+    expect(out).toContain('fill="transparent" id="base-polygon" stroke="#888"');
+    expect(out).toContain('stroke-width="22.6"'); // mask path thickened
+    expect(out).not.toContain('stroke-width="2"');
+    // '#000000' sentinel renders white
+    expect(out).toContain('stop-color:#ffffff');
+  });
+
+  it('uses the matched colour when provided', () => {
+    const out = prepareTileSvg(REALISTIC, {
+      tileset: 'loop',
+      nodeId: 'n2',
+      scale: 60,
+      scalePolygon: 1.4142,
+      inline: { borderStrokeWidth: 1.4, lineStrokeWidth: 22.6, stop1Color: '#22c55e' },
+    });
+    expect(out).toContain('stop-color:#22c55e');
+  });
+});
+
 describe('tileStyleParams', () => {
   it('computes scalePolygon for a square', () => {
     const sq = new RegularPolygon({ centroid: new Vector(0, 0), n: 4, angle: 0 });

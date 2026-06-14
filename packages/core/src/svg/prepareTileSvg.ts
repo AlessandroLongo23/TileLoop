@@ -60,12 +60,23 @@ export interface PrepareTileSvgOptions {
   nodeId: string;
   scale: number;
   scalePolygon: number;
+  /**
+   * When set, bake the tile styling into the SVG string (for react-native-svg,
+   * which has no CSS cascade). On web these come from a stylesheet instead.
+   */
+  inline?: {
+    borderStrokeWidth: number;
+    lineStrokeWidth: number;
+    /** Loop colour ('#000000' is the "unmatched" sentinel → rendered white). */
+    stop1Color: string;
+  };
 }
 
 /**
  * Normalize a raw tileset SVG: rewrite its viewBox/size, namespace its element
  * ids per tile (so multiple tiles don't collide on shared gradient/mask ids),
  * and strip filters. Mirrors the string munging that lived in Tile.svelte.
+ * With `opts.inline`, also bakes the per-tile styling into the markup.
  */
 export function prepareTileSvg(raw: string, opts: PrepareTileSvgOptions): string {
   const size = opts.scale * opts.scalePolygon + 1;
@@ -83,6 +94,21 @@ export function prepareTileSvg(raw: string, opts: PrepareTileSvgOptions): string
     .replace('url(#redGradient)', `url(#redGradient_${ns})`)
     .replace('id="gradientStop2" offset="20%"', `id="gradientStop2" offset="${20 * opts.scalePolygon}%"`)
     .replace(/<filter.*?>.*?<\/filter>/gs, '');
+
+  if (opts.inline) {
+    const loopColor = opts.inline.stop1Color === '#000000' ? '#ffffff' : opts.inline.stop1Color;
+    content = content
+      // base polygon: transparent fill + grey border (CSS did fill:transparent; stroke:#888)
+      .replace(
+        /<polygon fill="white" id="base-polygon" stroke="none"/,
+        `<polygon fill="transparent" id="base-polygon" stroke="#888" stroke-width="${opts.inline.borderStrokeWidth}"`,
+      )
+      // the mask path is the only stroke-width="2"; thicken it to the line width
+      .replace(/stroke-width="2"/, `stroke-width="${opts.inline.lineStrokeWidth}"`)
+      // colour both gradient stops so the loop is visible
+      .replace(/(id="gradientStop1"[^>]*stop-color:)#[0-9a-fA-F]+/, `$1${loopColor}`)
+      .replace(/(id="gradientStop2"[^>]*stop-color:)#[0-9a-fA-F]+/, `$1${loopColor}`);
+  }
 
   return content;
 }
