@@ -12,8 +12,8 @@ SvelteKit/Capacitor version and do not apply.
 ## Working agreements
 
 - Act as a ruthless mentor: push back when AL is wrong, say when you are unsure, no flattery.
-- The work tree is the whole Expo rewrite, uncommitted since `b7932ff` (2026-06-14). Commit only when
-  AL asks. Back up anything you overwrite (assets included) and check the copy before replacing it.
+- The Expo rewrite was committed on 2026-11-05 (`bce630c`..`bb258bf`). Commit only when AL asks.
+  Back up anything uncommitted you overwrite (assets included) and check the copy before replacing it.
 - Finish with fewer lines than you started where you can: search before writing, prefer a parameter
   to a fork, delete what a change supersedes. Report `+N/-M` lines with every finished task, and say
   in one sentence why when the count rose.
@@ -123,7 +123,9 @@ A section's first level can carry an intro card (`introFor`, key `chapter·100 +
 | 10 | Gears | gears |
 
 Endless plays blocks of 5 levels (`ENDLESS_BLOCK`) from random sections, capped at the section's
-largest board. Lab boards (`labLevel`) exercise one mechanic or tiling each; reach them from the
+largest board. The Daily is one section picked by the date, on a board from the upper half of its
+sizes. Both draw only from the sections the player has opened (`Opened`, `openedBy`; everything
+under `start:all`), so players at the same progress share a Daily. Lab boards (`labLevel`) exercise one mechanic or tiling each; reach them from the
 map's list icon under `npm run start:all`. Saves from before the 10×5 rework map onto the current
 chapters, and intro cards show again once.
 
@@ -132,10 +134,16 @@ chapters, and intro cards show again once.
 - Every campaign level builds, solves, and its solution takes exactly par taps.
 - Every tile of every campaign level is at least 44 pt wide (2·inradius·scale) on a 390×844 phone,
   whose board area is about 358×600. This rule removed 12-gon wheels, twelve-point stars and split
-  triangles from the campaign. Run the phone-size test on any new rule before using it.
+  triangles from the campaign. Run the phone-size test on any new rule before using it. Endless and
+  Daily boards are made on the fly, so `fingertip` (levels.ts) shrinks them until they pass
+  (`narrowestTile`); the test checks 60 Endless levels and 30 Dailies too.
 - Separate lines in one tile stay a line-width apart.
 
 ## Design decisions (AL's calls; do not re-open them)
+
+- Home: a new mosaic every launch (any campaign tiling but the duals, which build too slowly) in a
+  palette generated from the chapter palettes' OKLCH recipe (`world` in theme.ts). Its top is whole
+  tiles at uneven heights (`raggedTop`), full opacity, no fade.
 
 - The map is abstract: one rosette per chapter (medallion with the chapter emblem, five section
   frames on spokes, beads along each frame). AL rejected the illustrated island map.
@@ -238,7 +246,6 @@ in rows along the edge) and that it passes the 44 pt test.
 - Nobody has played the mirror-link levels yet.
 - Twin-line and star boards look busy.
 - The polyomino (merged-cell) family has not been mocked.
-- Endless and Daily should draw from opened chapters only.
 - The Mirrors rosette builds its geometry on first render (about 0.5 s on a phone, unmeasured).
 - Next across a chapter boundary switches the background colour instantly.
 - The README needs rewriting for the current game.
