@@ -1,12 +1,11 @@
 {
   "expo": {
-    "name": "TileLoop",
-    "slug": "tileloop",
+    "name": "Loop",
+    "slug": "loop",
     "version": "0.1.0",
     "orientation": "portrait",
-    "scheme": "tileloop",
-    "userInterfaceStyle": "dark",
-    "newArchEnabled": true,
+    "scheme": "loop",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tileloop.app"
@@ -14,16 +13,32 @@
     "android": {
       "package": "com.tileloop.app",
       "adaptiveIcon": {
-        "backgroundColor": "#18181b"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "monochromeImage": "./assets/monochrome-icon.png",
+        "backgroundColor": "#F4EDE4"
       }
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "single",
+      "favicon": "./assets/icon.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F4EDE4",
+          "dark": {
+            "backgroundColor": "#191715"
+          }
+        }
+      ]
+    ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "icon": "./assets/icon.png"
   }
 }

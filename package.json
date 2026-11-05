@@ -9,6 +9,8 @@
     "apps/*"
   ],
   "scripts": {
+    "start": "npm run start --workspace native",
+    "start:all": "npm run start:all --workspace native",
     "dev": "turbo dev",
     "build": "turbo build",
     "test": "turbo test",
@@ -19,10 +21,5 @@
     "turbo": "^2.5.0",
     "typescript": "^5.6.0",
     "@types/node": "^22.0.0"
-  },
-  "overrides": {
-    "vite": "^6.0.0",
-    "nativewind": "4.1.23",
-    "react-native-css-interop": "0.1.22"
   }
 }

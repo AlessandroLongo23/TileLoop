@@ -1,24 +1,5 @@
 import { useStore } from 'zustand';
-import {
-  configStore,
-  gameSettingsStore,
-  gameAppearanceStore,
-  sessionStore,
-  campaignProgressStore,
-  type ConfigState,
-  type GameSettings,
-  type Appearance,
-  type GameSession,
-  type CampaignProgress,
-} from '@tileloop/core';
+import { progressStore, settingsStore } from '@tileloop/core';
 
-export const useConfig = (): ConfigState => useStore(configStore, (s) => s);
-export const useGameSettings = (): GameSettings => useStore(gameSettingsStore, (s) => s.value);
-export const useAppearance = (): Appearance => useStore(gameAppearanceStore, (s) => s.value);
-export const useSession = (): GameSession => useStore(sessionStore, (s) => s.value);
-export const useCampaignProgress = (): CampaignProgress =>
-  useStore(campaignProgressStore, (s) => s.value);
-
-export function setGameSettings(patch: Partial<GameSettings>): void {
-  gameSettingsStore.getState().update((s) => ({ ...s, ...patch }));
-}
+export const useProgress = () => useStore(progressStore, (s) => s.value);
+export const useSettings = () => useStore(settingsStore, (s) => s.value);

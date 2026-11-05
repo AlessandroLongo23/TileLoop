@@ -1,8 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": "vite",
-  "buildCommand": "npm run build --workspace web",
-  "outputDirectory": "apps/web/dist",
+  "framework": null,
+  "buildCommand": "npm run export:web --workspace native",
+  "outputDirectory": "apps/native/dist",
   "installCommand": "npm install",
-  "rewrites": [{ "source": "/((?!assets/|tilesets/|sound/).*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!_expo/|assets/).*)", "destination": "/index.html" }]
 }

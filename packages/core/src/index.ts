@@ -19,22 +19,16 @@ export * from './util/seq';
 export * from './tiling/Polygon';
 export * from './tiling/Tiling';
 export * from './tiling/TilingGenerator';
-export * from './tiling/Level';
-export * from './tiling/levelLoader';
 
 // State
 export * from './state/configStore';
 export * from './state/persist';
-export * from './state/gameStores';
-export * from './state/progressApi';
 
 // Static data
 export * from './data/tilingRules';
-export * from './data/themes';
-export * from './data/campaign';
 
-// SVG
-export * from './svg/prepareTileSvg';
-
-// Audio
-export * from './audio/soundEngine';
+// Game
+export * from './game/puzzle';
+export * from './game/art';
+export * from './game/levels';
+export * from './game/progress';

@@ -2,7 +2,7 @@
  * Platform abstraction interfaces.
  *
  * The engine is framework- and host-agnostic. Anything that differs between
- * web, native, and tests (randomness, time, persistent storage, asset loading)
+ * web, native, and tests (randomness, time, persistent storage)
  * is injected through these interfaces so the same logic runs everywhere and is
  * deterministic under test.
  */
@@ -27,17 +27,9 @@ export interface Storage {
   removeItem(key: string): Promise<void>;
 }
 
-/** Loads the raw SVG markup for a single tile. */
-export type LoadTileSvg = (
-  tileset: string,
-  sides: number,
-  connections: string,
-) => Promise<string>;
-
 /** The full set of injected platform dependencies. */
 export interface Platform {
   rng: Rng;
   clock: Clock;
   storage: Storage;
-  loadTileSvg: LoadTileSvg;
 }

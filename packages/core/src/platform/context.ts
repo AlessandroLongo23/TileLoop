@@ -18,18 +18,15 @@ const noopStorage = {
   },
 };
 
-const noopLoadTileSvg = async () => '';
-
 /**
  * The live platform. Defaults are safe for pure-logic / Node test contexts
- * (system rng + clock, no-op storage/assets). Host apps call
+ * (system rng + clock, no-op storage). Host apps call
  * `configurePlatform` at startup to inject real implementations.
  */
 export const platform: Platform = {
   rng: systemRng,
   clock: systemClock,
   storage: noopStorage,
-  loadTileSvg: noopLoadTileSvg,
 };
 
 /** Override one or more platform dependencies. */

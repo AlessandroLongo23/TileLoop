@@ -1,8 +1,7 @@
 // Metro config for an Expo app inside an npm workspace monorepo.
 // Adds the repo root to watchFolders and both node_modules paths so the
-// workspace package @tileloop/core resolves, then wraps with NativeWind.
+// workspace package @tileloop/core resolves.
 const { getDefaultConfig } = require('expo/metro-config');
-const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
 
 const projectRoot = __dirname;
@@ -16,4 +15,4 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ];
 
-module.exports = withNativeWind(config, { input: './global.css' });
+module.exports = config;

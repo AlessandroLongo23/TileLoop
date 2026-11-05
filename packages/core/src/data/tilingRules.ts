@@ -93,42 +93,27 @@ export const tilingRules: TilingRuleGroup[] = [
 				rulestring: "6-3-6/m30/r(v4)",
 				dualname: "rhombille"
 			},
-			// {
-			// 	id: 6,
-			// 	name: "Truncated hexagonal",
-			// 	cr: "3.12^2",
-			// 	rulestring: "12-3/m30/r(h3)",
-			// 	dualname: "triakis triangular"
-			// },
-			// {
-			// 	id: 7,
-			// 	name: "Truncated trihexagonal",
-			// 	cr: "4.6.12",
-			// 	rulestring: "12-6,4/m30/r(c2)",
-			// 	dualname: "kisrhombille"
-			// },
-			// {
-			// 	id: 8,
-			// 	name: "Truncated square",
-			// 	cr: "4.8^2",
-			// 	rulestring: "8-4/m90/r(h4)",
-			// 	dualname: "tetrakis square",
-			// 	golRules: {
-			// 		standard: [],
-			// 		dual: [
-			// 			{
-		
-			// 				rule: "B48/S234",
-			// 				description: "",
-			// 			},
-			// 			{
-		
-			// 				rule: "B1/S1/G50",
-			// 				description: "",
-			// 			}
-			// 		]
-			// 	}
-			// },
+			{
+				id: 6,
+				name: "Truncated hexagonal",
+				cr: "3.12^2",
+				rulestring: "12-3/m30/r(h3)",
+				dualname: "triakis triangular"
+			},
+			{
+				id: 7,
+				name: "Truncated trihexagonal",
+				cr: "4.6.12",
+				rulestring: "12-6,4/m30/r(c2)",
+				dualname: "kisrhombille"
+			},
+			{
+				id: 8,
+				name: "Truncated square",
+				cr: "4.8^2",
+				rulestring: "8-4/m90/r(h4)",
+				dualname: "tetrakis square"
+			},
 		]
 	},
 	{
@@ -163,22 +148,22 @@ export const tilingRules: TilingRuleGroup[] = [
 				id: 5,
 				rulestring: "6-3/r120/m(h1)",
 			},
-			// {
-			// 	id: 6,
-			// 	name: "Diminished rhombitrihexagonal",
-			// 	cr: "4.6.12;3.4.6.4",
-			// 	rulestring: "12-4,6-3/m30/r(c3)",
-			// },
-			// {
-			// 	id: 7,
-			// 	cr: "3^6;3^2.4.12",
-			// 	rulestring: "12-3,4-3/m30/r(c3)",
-			// },
-			// {
-			// 	id: 8,
-			// 	cr: "3.12^2;3.4.3.12",
-			// 	rulestring: "12-0,3,3-0,0,4/r90/r(h1)",
-			// },
+			{
+				id: 6,
+				name: "Diminished rhombitrihexagonal",
+				cr: "4.6.12;3.4.6.4",
+				rulestring: "12-4,6-3/m30/r(c3)",
+			},
+			{
+				id: 7,
+				cr: "3^6;3^2.4.12",
+				rulestring: "12-3,4-3/m30/r(c3)",
+			},
+			{
+				id: 8,
+				cr: "3.12^2;3.4.3.12",
+				rulestring: "12-0,3,3-0,0,4/r90/r(h1)",
+			},
 			{
 				id: 9,
 				name: "hexagonal (2/3 dissected)",
