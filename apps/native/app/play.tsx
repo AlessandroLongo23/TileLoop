@@ -20,6 +20,7 @@ import {
   introFor,
   levelsIn,
   levelUnlocked,
+  openedBy,
   LAB_LEVELS,
   labLevel,
   type LevelDef,
@@ -38,6 +39,8 @@ import { setLastPlayed } from '../src/journey';
 const UNLOCK_ALL = process.env.EXPO_PUBLIC_UNLOCK_ALL === '1';
 // how long the cover takes to hide a solved board before the next one comes in
 const COVER = 180;
+// what Endless and the Daily may draw from: the sections the player has opened
+const opened = (p: Progress) => (UNLOCK_ALL ? undefined : openedBy(p));
 
 function refFromParams(p: Record<string, string | undefined>): LevelRef {
   if (p.mode === 'daily') return { mode: 'daily', date: p.date };
@@ -70,7 +73,9 @@ export default function Play() {
   useEffect(() => {
     if (ref.mode === 'campaign') setLastPlayed(ref.chapter!, ref.level!);
   }, [ref]);
-  const def = useMemo(() => levelDef(ref), [ref]);
+  // not on progress: solving changes it, and the board must not be rebuilt under the player
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const def = useMemo(() => levelDef(ref, opened(progress)), [ref]);
   // The next level is built and laid out unseen while the player looks at the solved board, so Next
   // only has to show it: mounting a board in the same moment as the fade made the fade stall.
   const [ahead, setAhead] = useState<{ def: LevelDef; puzzle: Puzzle } | null>(null);
@@ -189,7 +194,7 @@ export default function Play() {
     const n = nextRef(ref, progress);
     if (!n) return;
     const t = setTimeout(() => {
-      const d = levelDef(n);
+      const d = levelDef(n, opened(progress));
       setAhead({ def: d, puzzle: buildPuzzle(d.spec, d.seed) });
     }, 600);
     return () => clearTimeout(t);

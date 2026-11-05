@@ -1,6 +1,5 @@
-import { tilingRules } from '../data/tilingRules';
 import { atlasTilings } from '../data/atlasTilings';
-import type { PuzzleSpec } from './puzzle';
+import { buildPuzzle, narrowestTile, type PuzzleSpec } from './puzzle';
 import { mulberry32 } from '../platform/rng';
 
 /** A world's colours: a calm background, one colour for every line, and the fills a solved board takes. */
@@ -65,8 +64,6 @@ export function chapterRules(ch: Chapter): string[] {
   return [...new Set(ch.sections.flatMap((s) => s.rules))];
 }
 
-const rulesIn = (groupId: string) =>
-  tilingRules.find((g) => g.id === groupId)?.rules.map((r) => r.rulestring) ?? [];
 
 const world = (bg: string, line: string, ...fills: string[]): Palette => ({ bg, line, fills });
 
@@ -300,36 +297,47 @@ export function introFor(chapter: number, level: number): { key: number; title: 
   return intro ? { key: chapter * 100 + sectionOf(level), ...intro } : null;
 }
 
-const dailyPool = [
-  ...rulesIn('1Ur'),
-  ...rulesIn('1Usr'),
-  ...rulesIn('2U'),
-];
+/** The sections a player has opened, by chapter id and 0-based section. Chapter 1's first always is. */
+export type Opened = (chapter: number, section: number) => boolean;
+const everyOpen: Opened = () => true;
+
+/**
+ * Fewer tiles until every one is a fingertip (44 pt) wide on a phone. The campaign's sizes are
+ * checked by its tests; Endless and the Daily make boards no test sees, so they check here.
+ */
+function fingertip(spec: PuzzleSpec, seed: number): PuzzleSpec {
+  for (let tiles = spec.tiles; ; ) {
+    const w = narrowestTile(buildPuzzle({ ...spec, tiles }, seed));
+    if (w >= 44 || tiles <= 6) return { ...spec, tiles };
+    // a tile's width goes roughly with 1 / sqrt(tile count)
+    tiles = Math.max(6, Math.min(tiles - 1, Math.floor(tiles * (w / 44) ** 2)));
+  }
+}
 
 export function todayKey(d = new Date()): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-/** The same puzzle for everyone on a given day, in the colours of the world its tiling comes from. */
-export function dailyLevel(date = todayKey()): LevelDef {
+/**
+ * The Daily: one of the player's opened sections, picked by the date, with its tilings and
+ * mechanics on a board from the upper half of its sizes, in its world's colours. Players who have
+ * opened the same sections get the same puzzle.
+ */
+export function dailyLevel(date = todayKey(), open: Opened = everyOpen): LevelDef {
   const seed = hashSeed(`loop:daily:${date}`);
-  const rulestring = dailyPool[seed % dailyPool.length];
-  const owner = chapters.find((c) => chapterRules(c).includes(rulestring));
-  return {
-    ref: { mode: 'daily', date },
-    seed,
-    palette: owner?.palette ?? chapters[(seed >>> 8) % chapters.length].palette,
-    spec: { rule: rulestring, tiles: 26 + ((seed >>> 4) % 10), density: 0.55, doubles: 0.15, links: 0.1 },
-  };
+  const pool = chapters.flatMap((ch) => ch.sections.filter((_, i) => open(ch.id, i)).map((sec) => ({ ch, sec })));
+  const { ch, sec } = pool[seed % pool.length];
+  const rule = sec.rules[(seed >>> 3) % sec.rules.length].replace('{n}', String(1 + ((seed >>> 5) % 50)));
+  const tiles = Math.round(lerp(sec.tiles[0], sec.tiles[1], 0.5 + ((seed >>> 7) % 6) / 10));
+  return { ref: { mode: 'daily', date }, seed, palette: ch.palette, spec: fingertip(specFor(sec, rule, tiles, seed >>> 11), seed) };
 }
 
 export const ENDLESS_BLOCK = 5;
 
-/** Which world a block of Endless levels takes: the campaign order first, then a shuffle per round, never the same twice running. */
-function endlessWorld(block: number): number {
-  const k = chapters.length;
-  const order = (round: number) => {
-    const o = chapters.map((_, i) => i);
+/** Which of `k` opened worlds a block of Endless levels takes: campaign order first, then a shuffle per round, never the same twice running. */
+function endlessWorld(block: number, k: number): number {
+  const order = (round: number): number[] => {
+    const o = Array.from({ length: k }, (_, i) => i);
     if (round === 0) return o;
     const rng = mulberry32(hashSeed(`loop:endless:round:${round}`));
     for (let i = k - 1; i > 0; i--) {
@@ -337,22 +345,24 @@ function endlessWorld(block: number): number {
       [o[i], o[j]] = [o[j], o[i]];
     }
     // a round never opens with the world the last one closed on
-    if (o[0] === order(round - 1)[k - 1]) [o[0], o[1]] = [o[1], o[0]];
+    if (k > 1 && o[0] === order(round - 1)[k - 1]) [o[0], o[1]] = [o[1], o[0]];
     return o;
   };
   return order(Math.floor(block / k))[block % k];
 }
 
-/** Endless mode: level n, slowly growing. Every five levels share one world: its tilings, its rules and its colours. */
-export function endlessLevel(n: number): LevelDef {
+/** Endless mode: level n, slowly growing. Every five levels share one opened world: its tilings, its rules and its colours. */
+export function endlessLevel(n: number, open: Opened = everyOpen): LevelDef {
   const seed = hashSeed(`loop:endless:${n}`);
-  const ch = chapters[endlessWorld(Math.floor((n - 1) / ENDLESS_BLOCK))];
-  // any section of the world, with its mechanics, on a board that grows with n
-  const sec = ch.sections[(seed >>> 3) % ch.sections.length];
+  const worlds = chapters.filter((c) => open(c.id, 0));
+  const ch = worlds[endlessWorld(Math.floor((n - 1) / ENDLESS_BLOCK), worlds.length)];
+  // any opened section of the world, with its mechanics, on a board that grows with n
+  const secs = ch.sections.filter((_, i) => open(ch.id, i));
+  const sec = secs[(seed >>> 3) % secs.length];
   const rule = sec.rules[seed % sec.rules.length].replace('{n}', String(n));
   // never past the section's own largest board, so small tiles stay big enough to tap
   const tiles = Math.round(Math.min(8 + Math.min(n * 1.1, 34), sec.tiles[1]));
-  return { ref: { mode: 'endless', level: n }, seed, palette: ch.palette, spec: specFor(sec, rule, tiles) };
+  return { ref: { mode: 'endless', level: n }, seed, palette: ch.palette, spec: fingertip(specFor(sec, rule, tiles), seed) };
 }
 
 /** Lab: test boards for tilings and mechanics that are not in the campaign yet. */
@@ -379,9 +389,10 @@ export function labLevel(n: number): LevelDef & { name: string } {
   return { ref: { mode: 'lab', level: n }, name: l.name, seed: hashSeed(`loop:lab:${n}`), palette: chapters[3].palette, spec: l.spec };
 }
 
-export function levelDef(ref: LevelRef): LevelDef {
+/** A level's definition. Endless and the Daily draw from the sections `open` (all, by default). */
+export function levelDef(ref: LevelRef, open?: Opened): LevelDef {
   if (ref.mode === 'lab') return labLevel(ref.level ?? 1);
-  if (ref.mode === 'daily') return dailyLevel(ref.date);
-  if (ref.mode === 'endless') return endlessLevel(ref.level ?? 1);
+  if (ref.mode === 'daily') return dailyLevel(ref.date, open);
+  if (ref.mode === 'endless') return endlessLevel(ref.level ?? 1, open);
   return campaignLevel(ref.chapter ?? 1, ref.level ?? 1);
 }

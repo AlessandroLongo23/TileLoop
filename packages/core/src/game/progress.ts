@@ -1,5 +1,5 @@
 import { createPersistedStore } from '../state/persist';
-import { chapters, levelsIn, SECTION_GATE, SECTION_LEVELS, todayKey, type LevelRef } from './levels';
+import { chapters, levelsIn, SECTION_GATE, SECTION_LEVELS, todayKey, type LevelRef, type Opened } from './levels';
 
 export interface LevelRecord {
   stars: number;
@@ -68,6 +68,9 @@ export function sectionOpen(p: Progress, chapter: number, section: number): bool
   if (!chapterUnlocked(p, chapter)) return false;
   return section === 0 || sectionStars(p, chapter, section - 1) >= SECTION_GATE;
 }
+
+/** The sections a player has opened, which Endless and the Daily draw from. */
+export const openedBy = (p: Progress): Opened => (chapter, section) => sectionOpen(p, chapter, section);
 
 /** A chapter opens once the one before it is through: its last section gave enough dots. */
 export function chapterUnlocked(p: Progress, chapter: number): boolean {

@@ -152,6 +152,20 @@ function shuffle<T>(a: T[], rng: Rng): T[] {
   return a;
 }
 
+/**
+ * The narrowest tile's width in points (twice its centre's distance to its nearest side) when the
+ * board is fitted to a `w` x `h` play area: a 390 x 844 phone's, less header and footer, by default.
+ * A fingertip needs 44.
+ */
+export function narrowestTile(p: Puzzle, w = 358, h = 600): number {
+  const b = p.bounds;
+  const s = Math.min(w / (b.maxX - b.minX + 0.2), h / (b.maxY - b.minY + 0.2), 150);
+  return s * Math.min(...p.tiles.map((t) => 2 * Math.min(...t.verts.map((a, i) => {
+    const c = t.verts[(i + 1) % t.verts.length];
+    return Math.abs((t.x - a.x) * (c.y - a.y) - (t.y - a.y) * (c.x - a.x)) / Math.hypot(c.x - a.x, c.y - a.y);
+  }))));
+}
+
 /** Build a level. Same spec and seed give the same board on every device. */
 export function buildPuzzle(spec: PuzzleSpec, seed: number): Puzzle {
   const rng = mulberry32(seed);

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { buildPuzzle, isSolved, tap, solveSteps, starsFor, edgeValue, startOf, restart, type Puzzle, type PuzzleSpec } from './puzzle';
+import { buildPuzzle, isSolved, tap, solveSteps, starsFor, edgeValue, startOf, restart, narrowestTile, type Puzzle, type PuzzleSpec } from './puzzle';
 import { tileArt, strokeFor } from './art';
 import { atlasTilings } from '../data/atlasTilings';
-import { campaignLevel, dailyLevel, endlessLevel, chapters, chapterRules, levelsIn, ENDLESS_BLOCK, SECTION_GATE, SECTION_LEVELS } from './levels';
+import { campaignLevel, dailyLevel, endlessLevel, chapters, chapterRules, levelsIn, ENDLESS_BLOCK, SECTION_GATE, SECTION_LEVELS, type Opened } from './levels';
 import { levelUnlocked, sectionOpen, chapterUnlocked, nextCampaignLevel, type Progress } from './progress';
 
 const campaign = chapters.flatMap((c) =>
@@ -259,6 +259,29 @@ describe('Endless and Daily colours', () => {
       expect(world(endless[b * ENDLESS_BLOCK])).not.toBe(world(endless[b * ENDLESS_BLOCK - 1]));
     expect(Array.from({ length: chapters.length }, (_, b) => world(endless[b * ENDLESS_BLOCK]).id)).toEqual(chapters.map((c) => c.id));
   });
+
+  // a beginner (chapter 1's first section) and a player two sections into chapter 2
+  const players: [string, Opened][] = [
+    ['beginner', (c, s) => c === 1 && s === 0],
+    ['chapter 2', (c, s) => c === 1 || (c === 2 && s <= 1)],
+  ];
+  it.each(players)('a %s meets only the sections they opened, mechanics included', (_, open) => {
+    const mechanics = ['fixed', 'doubles', 'links', 'reverse', 'passive', 'mirrors', 'gears'] as const;
+    const levels = [
+      ...Array.from({ length: 60 }, (_, i) => endlessLevel(i + 1, open)),
+      ...Array.from({ length: 30 }, (_, i) => dailyLevel(`2026-12-${String(i + 1).padStart(2, '0')}`, open)),
+    ];
+    for (const d of levels) {
+      const ch = chapters.find((c) => c.palette === d.palette)!;
+      const from = ch.sections.filter((sec, i) =>
+        open(ch.id, i) &&
+        sec.density === d.spec.density &&
+        sec.rules.some((r) => d.spec.rule.startsWith(r.replace('{n}', ''))) &&
+        mechanics.every((m) => sec[m] === d.spec[m]),
+      );
+      expect(from.length, JSON.stringify(d.ref)).toBeGreaterThan(0);
+    }
+  });
 });
 
 describe('multi-scale boards (split tiles)', () => {
@@ -285,20 +308,10 @@ describe('multi-scale boards (split tiles)', () => {
 });
 
 describe('phone size', () => {
-  // the play area on a 390 x 844 phone, less the header and footer
-  const W = 358;
-  const H = 600;
-  it('every tile of every campaign level is at least 44 points wide (a fingertip)', () => {
-    const narrow = campaign.flatMap((d) => {
-      const p = build(d);
-      const b = p.bounds;
-      const s = Math.min(W / (b.maxX - b.minX + 0.2), H / (b.maxY - b.minY + 0.2), 150);
-      // a tile's width: twice the distance from its centre to its nearest side
-      const w = s * Math.min(...p.tiles.map((t) => 2 * Math.min(...t.verts.map((a, i) => {
-        const c = t.verts[(i + 1) % t.n];
-        return Math.abs((t.x - a.x) * (c.y - a.y) - (t.y - a.y) * (c.x - a.x)) / Math.hypot(c.x - a.x, c.y - a.y);
-      }))));
-      return w < 44 ? [`${d.ref.chapter}-${d.ref.level}: ${w.toFixed(0)}pt`] : [];
+  it('every tile of every campaign, Daily and Endless level is at least 44 points wide (a fingertip)', () => {
+    const narrow = all.flatMap((d) => {
+      const w = narrowestTile(build(d));
+      return w < 44 ? [`${JSON.stringify(d.ref)}: ${w.toFixed(0)}pt`] : [];
     });
     expect(narrow).toEqual([]);
   });
