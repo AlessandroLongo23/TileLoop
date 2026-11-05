@@ -223,12 +223,15 @@ cp app/build/outputs/apk/release/app-release.apk ../../../dist/Loop-<version>.ap
 
 ## Icon
 
-`assets/icon.png` (1024, RGB, full bleed), `adaptive-icon.png` (transparent Android foreground),
-`monochrome-icon.png` (Android 13 themed icons, tiles at partial alpha). The design is a ring of
-four quarter-arcs across a 2×2 board of squares, in chapter 1's palette (bg `#F4EDE4`, ink
-`#2D2A26`, fills `#E9B872` and `#E39E6B`), drawn with `tileArt` at stroke 0.15. The foreground's
-2×2 square is 432 px on the 1024 canvas (diagonal 611 px), inside Android's 66 dp safe circle
-(626 px). The generator was a scratch script and was not kept: redraw with `tileArt` if needed.
+`assets/icon.png` (1024, RGB), `adaptive-icon.png` (Android foreground, opaque),
+`monochrome-icon.png` (Android 13 themed icons, alpha only). The design is a ring of four
+quarter-arcs across a 2×2 board of squares, in chapter 1's palette (ink `#2D2A26`, fills `#E9B872`
+and `#E39E6B`), drawn with `tileArt` at stroke 0.15. No padding (AL, 2026-11-05): the four squares
+run to the canvas edges. iOS tiles are 512 px (the canvas is the board). Android shows only the
+middle 72 of 108 dp, so its tiles are 341 px (half of that 683 px window) while the quadrants
+still fill the layer; the ring (393 px across) sits inside the 66 dp safe circle (626 px).
+Monochrome: fills at alpha 0.32 and 0.5, ring opaque. The generator was a scratch script and was
+not kept: redraw with `tileArt` if needed.
 
 ## Finding new tilings
 
